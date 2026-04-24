@@ -30,33 +30,70 @@ async function loadMetrics() {
 function renderMetrics(m) {
   const el = document.getElementById("metricsSummary");
 
-  const fmt = (v, suffix = "") => (v === null || v === undefined) ? "—" : `${v}${suffix}`;
-  const rCls = (v) => v === null || v === undefined ? "" : v > 0 ? "metric-value-positive" : v < 0 ? "metric-value-negative" : "";
-  const warnCls = (v) => v > 0 ? "metric-value-negative" : "";
+  const fmt      = (v, s = "") => (v === null || v === undefined) ? "—" : `${v}${s}`;
+  const rCls     = (v) => v === null || v === undefined ? "" : v > 0 ? "metric-value-positive" : v < 0 ? "metric-value-negative" : "";
+  const warnCls  = (v) => v > 0 ? "metric-value-negative" : "";
 
-  const cards = [
-    { label: "Total de trades",           value: fmt(m.total_trades),                cls: "" },
-    { label: "Setups válidos",             value: fmt(m.valid_setups),                cls: m.valid_setups > 0 ? "metric-value-positive" : "" },
-    { label: "Setups inválidos",           value: fmt(m.invalid_setups),              cls: warnCls(m.invalid_setups) },
-    { label: "Trades disciplinados",       value: fmt(m.disciplined_trades),          cls: m.disciplined_trades > 0 ? "metric-value-positive" : "" },
-    { label: "Errores de disciplina",      value: fmt(m.discipline_errors),           cls: warnCls(m.discipline_errors) },
-    { label: "Trades con FOMO",            value: fmt(m.fomo_trades),                 cls: warnCls(m.fomo_trades) },
-    { label: "Trades con ansiedad",        value: fmt(m.anxiety_trades),              cls: warnCls(m.anxiety_trades) },
-    { label: "Salidas por miedo",          value: fmt(m.fear_exits),                  cls: warnCls(m.fear_exits) },
-    { label: "Salidas por impulso",        value: fmt(m.impulse_exits),               cls: warnCls(m.impulse_exits) },
-    { label: "Promedio R",                 value: fmt(m.avg_result_r),                cls: rCls(m.avg_result_r) },
-    { label: "Promedio R setups válidos",  value: fmt(m.avg_result_r_valid_setups),   cls: rCls(m.avg_result_r_valid_setups) },
-    { label: "Winrate general",            value: fmt(m.winrate_overall, "%"),        cls: "" },
-    { label: "Winrate setups válidos",     value: fmt(m.winrate_valid_setups, "%"),   cls: "" },
-  ];
-
-  el.innerHTML = `<div class="metrics-grid">${
-    cards.map(c => `
-      <div class="metric-card">
+  const mkGrid = (cards) =>
+    `<div class="metrics-grid">${cards.map(c =>
+      `<div class="metric-card">
         <span class="metric-label">${c.label}</span>
         <span class="metric-value ${c.cls}">${c.value}</span>
-      </div>`).join("")
-  }</div>`;
+      </div>`).join("")}</div>`;
+
+  const mkSection = (title, cards) =>
+    `<div class="metrics-section">
+      <p class="metrics-section-title">${title}</p>
+      ${mkGrid(cards)}
+    </div>`;
+
+  const general = [
+    { label: "Total de trades",          value: fmt(m.total_trades),              cls: "" },
+    { label: "Setups válidos",           value: fmt(m.valid_setups),              cls: m.valid_setups > 0 ? "metric-value-positive" : "" },
+    { label: "Setups inválidos",         value: fmt(m.invalid_setups),            cls: warnCls(m.invalid_setups) },
+    { label: "Trades disciplinados",     value: fmt(m.disciplined_trades),        cls: m.disciplined_trades > 0 ? "metric-value-positive" : "" },
+    { label: "Errores de disciplina",    value: fmt(m.discipline_errors),         cls: warnCls(m.discipline_errors) },
+    { label: "Promedio R",               value: fmt(m.avg_result_r),              cls: rCls(m.avg_result_r) },
+    { label: "Promedio R válidos",       value: fmt(m.avg_result_r_valid_setups), cls: rCls(m.avg_result_r_valid_setups) },
+    { label: "Winrate general",          value: fmt(m.winrate_overall, "%"),      cls: "" },
+    { label: "Winrate válidos",          value: fmt(m.winrate_valid_setups, "%"), cls: "" },
+  ];
+
+  const tech = [
+    { label: "Sin sweep",          value: fmt(m.trades_without_sweep),       cls: warnCls(m.trades_without_sweep) },
+    { label: "Sin PDA HTF",        value: fmt(m.trades_without_pda),         cls: warnCls(m.trades_without_pda) },
+    { label: "Sin IFVG",           value: fmt(m.trades_without_ifvg),        cls: warnCls(m.trades_without_ifvg) },
+    { label: "Sin V-Shape",        value: fmt(m.trades_without_vshape),      cls: warnCls(m.trades_without_vshape) },
+    { label: "Reacción no limpia", value: fmt(m.trades_unclean_reaction),    cls: warnCls(m.trades_unclean_reaction) },
+    { label: "Fuera de KZ NY",     value: fmt(m.trades_outside_ny_killzone), cls: warnCls(m.trades_outside_ny_killzone) },
+  ];
+
+  const psych = [
+    { label: "FOMO",               value: fmt(m.fomo_trades),        cls: warnCls(m.fomo_trades) },
+    { label: "Ansiedad",           value: fmt(m.anxiety_trades),     cls: warnCls(m.anxiety_trades) },
+    { label: "Frustración",        value: fmt(m.frustration_trades), cls: warnCls(m.frustration_trades) },
+    { label: "Rompió reglas",      value: fmt(m.rule_break_trades),  cls: warnCls(m.rule_break_trades) },
+    { label: "Salida por miedo",   value: fmt(m.fear_exits),         cls: warnCls(m.fear_exits) },
+    { label: "Salida por impulso", value: fmt(m.impulse_exits),      cls: warnCls(m.impulse_exits) },
+  ];
+
+  const gradesHtml = `
+    <div class="metrics-section">
+      <p class="metrics-section-title">Calidad de ejecución</p>
+      <div class="grade-grid">
+        <div class="grade-metric-card grade-a-plus"><span class="grade-metric-label">A+</span><span class="grade-metric-value">${fmt(m.grade_a_plus_trades)}</span></div>
+        <div class="grade-metric-card grade-a">     <span class="grade-metric-label">A</span> <span class="grade-metric-value">${fmt(m.grade_a_trades)}</span></div>
+        <div class="grade-metric-card grade-b">     <span class="grade-metric-label">B</span> <span class="grade-metric-value">${fmt(m.grade_b_trades)}</span></div>
+        <div class="grade-metric-card grade-c">     <span class="grade-metric-label">C</span> <span class="grade-metric-value">${fmt(m.grade_c_trades)}</span></div>
+        <div class="grade-metric-card grade-f">     <span class="grade-metric-label">F</span> <span class="grade-metric-value">${fmt(m.grade_f_trades)}</span></div>
+      </div>
+    </div>`;
+
+  el.innerHTML =
+    mkSection("Resumen general", general) +
+    mkSection("Errores técnicos", tech) +
+    mkSection("Errores psicológicos", psych) +
+    gradesHtml;
 }
 
 // ─── Test de conexión ────────────────────────────────────────────────────────
