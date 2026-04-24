@@ -615,6 +615,18 @@ function renderTrades(trades) {
       ? `<div class="bias-badges" style="flex-wrap:wrap;gap:6px;margin-bottom:10px;">${labelParts.join("")}</div>`
       : "";
 
+    const gradeClass = { "A+": "grade-a-plus", "A": "grade-a", "B": "grade-b", "C": "grade-c", "F": "grade-f" }[trade.trade_grade] || "grade-f";
+    const techCls  = (trade.technical_error_label  || "").startsWith("Error")      ? "analysis-error" :
+                     (trade.technical_error_label  || "").startsWith("Advertencia") ? "analysis-warn"  : "analysis-ok";
+    const psycCls  = (trade.psychology_error_label || "").startsWith("Error")      ? "analysis-error" : "analysis-ok";
+    const analysisHtml = trade.trade_grade ? `
+      <div class="trade-analysis">
+        <span class="trade-grade ${gradeClass}">${escapeHtml(trade.trade_grade)}</span>
+        <span class="analysis-chip ${techCls}">${escapeHtml(trade.technical_error_label || "")}</span>
+        <span class="analysis-chip ${psycCls}">${escapeHtml(trade.psychology_error_label || "")}</span>
+        <span class="analysis-chip analysis-quality">${escapeHtml(trade.execution_quality_label || "")}</span>
+      </div>` : "";
+
     const emotionLabels = {
       calmado: "Calmado", ansioso: "Ansioso", fomo: "FOMO",
       frustrado: "Frustrado", neutral: "Neutral",
@@ -644,6 +656,7 @@ function renderTrades(trades) {
           <div class="bias-badges">${dirBadge}</div>
         </div>
         ${labelsHtml}
+        ${analysisHtml}
 
         <div class="bias-levels">
           <div class="bias-level-item">

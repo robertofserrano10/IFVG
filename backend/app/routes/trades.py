@@ -17,7 +17,10 @@ def _add_labels(trade: dict) -> dict:
     ifvg_confirmed   = trade.get("ifvg_confirmed", False)
     vshape_confirmed = trade.get("vshape_confirmed", False)
     pda_confirmed    = trade.get("pda_confirmed", False)
+    clean_reaction   = trade.get("clean_reaction", False)
+    ny_killzone      = trade.get("ny_killzone", False)
 
+    # ── discipline_label (existing) ──────────────────────────────────────────
     if not setup_valid:
         if sweep_confirmed and ifvg_confirmed and vshape_confirmed and not pda_confirmed:
             trade["discipline_label"] = "Setup inválido: faltó PDA HTF"
@@ -30,17 +33,67 @@ def _add_labels(trade: dict) -> dict:
     else:
         trade["discipline_label"] = None
 
+    # ── emotional_label (existing) ───────────────────────────────────────────
     trade["emotional_label"] = (
         "Trade emocional (FOMO)" if emotional_state == "fomo"    else
         "Trade con ansiedad"     if emotional_state == "ansioso" else
         None
     )
 
+    # ── exit_label (existing) ────────────────────────────────────────────────
     trade["exit_label"] = (
         "Salida por miedo"   if exit_reason == "por_miedo"   else
         "Salida por impulso" if exit_reason == "por_impulso" else
         None
     )
+
+    # ── technical_error_label ────────────────────────────────────────────────
+    if not sweep_confirmed:
+        technical = "Error técnico: entrada sin sweep"
+    elif not pda_confirmed:
+        technical = "Error técnico: faltó PDA HTF"
+    elif not ifvg_confirmed:
+        technical = "Error técnico: entrada sin IFVG"
+    elif not vshape_confirmed:
+        technical = "Error técnico: faltó V-Shape"
+    elif setup_valid and not clean_reaction:
+        technical = "Advertencia técnica: reacción no limpia"
+    elif setup_valid and not ny_killzone:
+        technical = "Advertencia técnica: fuera de Killzone NY"
+    else:
+        technical = "Sin error técnico crítico"
+    trade["technical_error_label"] = technical
+
+    # ── psychology_error_label ───────────────────────────────────────────────
+    if emotional_state == "fomo":
+        psychology = "Error psicológico: FOMO"
+    elif emotional_state == "ansioso":
+        psychology = "Error psicológico: ansiedad"
+    elif emotional_state == "frustrado":
+        psychology = "Error psicológico: frustración"
+    elif followed_rules is False:
+        psychology = "Error psicológico: rompió reglas"
+    elif exit_reason == "por_miedo":
+        psychology = "Error psicológico: salida por miedo"
+    elif exit_reason == "por_impulso":
+        psychology = "Error psicológico: salida por impulso"
+    else:
+        psychology = "Sin error psicológico crítico"
+    trade["psychology_error_label"] = psychology
+
+    # ── execution_quality_label + trade_grade ────────────────────────────────
+    if setup_valid and followed_rules is True and clean_reaction and ny_killzone:
+        quality, grade = "Ejecución A+", "A+"
+    elif setup_valid and followed_rules is True:
+        quality, grade = "Ejecución correcta", "A"
+    elif setup_valid and followed_rules is False:
+        quality, grade = "Setup válido con mala disciplina", "B"
+    elif not setup_valid and followed_rules is True:
+        quality, grade = "Buena disciplina, mal setup", "C"
+    else:
+        quality, grade = "Mal setup y mala disciplina", "F"
+    trade["execution_quality_label"] = quality
+    trade["trade_grade"] = grade
 
     return trade
 

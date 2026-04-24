@@ -48,7 +48,11 @@ class TradeResponse(BaseModel):
     followed_rules:   Optional[bool]
     emotional_state:  Optional[str]
     exit_reason:      Optional[str]
-    discipline_label: Optional[str] = None
-    emotional_label:  Optional[str] = None
-    exit_label:       Optional[str] = None
-    created_at:       datetime
+    discipline_label:       Optional[str] = None
+    emotional_label:        Optional[str] = None
+    exit_label:             Optional[str] = None
+    technical_error_label:  Optional[str] = None
+    psychology_error_label: Optional[str] = None
+    execution_quality_label:Optional[str] = None
+    trade_grade:            Optional[str] = None
+    created_at:             datetime
