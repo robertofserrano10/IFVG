@@ -1,0 +1,652 @@
+/* Reset básico: elimina márgenes y paddings por defecto del navegador */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #0f1117;
+  color: #e2e8f0;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px;
+}
+
+.container {
+  width: 100%;
+  max-width: 640px;
+}
+
+header {
+  margin-bottom: 40px;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  margin-top: 8px;
+  font-size: 1rem;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+/* Tarjeta de sección */
+.card {
+  background-color: #1e2130;
+  border: 1px solid #2d3148;
+  border-radius: 12px;
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.card h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 8px;
+}
+
+.card > p {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin-bottom: 20px;
+}
+
+/* Botón principal */
+button {
+  background-color: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #2563eb;
+}
+
+button:disabled {
+  background-color: #475569;
+  cursor: not-allowed;
+}
+
+/* Botón secundario — toggle campos avanzados */
+.btn-secondary {
+  background-color: transparent;
+  color: #64748b;
+  border: 1px solid #2d3148;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+}
+
+.btn-secondary:hover {
+  background-color: #2d3148;
+  color: #cbd5e1;
+}
+
+/* Mensajes de resultado */
+.result {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.result.success {
+  background-color: #052e16;
+  border: 1px solid #16a34a;
+  color: #4ade80;
+}
+
+.result.error {
+  background-color: #2d0d0d;
+  border: 1px solid #dc2626;
+  color: #f87171;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ─── Formulario ─────────────────────────────── */
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  margin-bottom: 6px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="number"],
+.form-group input[type="url"],
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  background-color: #0f1117;
+  border: 1px solid #2d3148;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  color: #e2e8f0;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="date"]:focus,
+.form-group input[type="number"]:focus,
+.form-group input[type="url"]:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #3b82f6;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.form-group select {
+  appearance: none;
+  cursor: pointer;
+}
+
+/* Etiqueta de subsección dentro del formulario */
+.form-section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #475569;
+  margin-bottom: 12px;
+  margin-top: 8px;
+}
+
+/* Grid de dos columnas para campos numéricos */
+.form-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.form-cols .form-group {
+  margin-bottom: 0;
+}
+
+/* Grupo de checkboxes */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+  flex-shrink: 0;
+}
+
+/* Sección de campos avanzados colapsable */
+.advanced-fields {
+  border-top: 1px solid #2d3148;
+  margin-top: 4px;
+  margin-bottom: 20px;
+  padding-top: 20px;
+}
+
+/* ─── Lista de Trading Days ───────────────────── */
+
+.trading-day-item {
+  border: 1px solid #2d3148;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.trading-day-item:last-child {
+  margin-bottom: 0;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.day-date {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.day-market {
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: #1e3a5f;
+  color: #93c5fd;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.day-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.tag {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.tag-active {
+  background-color: #1c3829;
+  color: #4ade80;
+  border: 1px solid #16a34a;
+}
+
+.tag-inactive {
+  background-color: #16181f;
+  color: #475569;
+  border: 1px solid #2d3148;
+}
+
+.day-notes {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.day-created {
+  font-size: 0.75rem;
+  color: #475569;
+  margin-top: 10px;
+}
+
+/* ─── Lista de Daily Bias ─────────────────────── */
+
+.bias-item {
+  border: 1px solid #2d3148;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.bias-item:last-child {
+  margin-bottom: 0;
+}
+
+.bias-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.bias-day-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.bias-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.badge-direction {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-bullish {
+  background-color: #1c3829;
+  color: #4ade80;
+  border: 1px solid #16a34a;
+}
+
+.badge-bearish {
+  background-color: #2d0d0d;
+  color: #f87171;
+  border: 1px solid #dc2626;
+}
+
+.badge-none {
+  background-color: #16181f;
+  color: #475569;
+  border: 1px solid #2d3148;
+}
+
+.badge-active {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background-color: #1c3829;
+  color: #4ade80;
+  border: 1px solid #16a34a;
+}
+
+.badge-inactive {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background-color: #2d0d0d;
+  color: #f87171;
+  border: 1px solid #dc2626;
+}
+
+.bias-levels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.bias-level-item {
+  background-color: #0f1117;
+  border: 1px solid #2d3148;
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+}
+
+.bias-level-label {
+  font-size: 0.65rem;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.bias-level-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.bias-directions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.bias-dir-chip {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background-color: #0f1117;
+  border: 1px solid #2d3148;
+  color: #94a3b8;
+}
+
+.bias-dir-chip span {
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.bias-flags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.bias-flag {
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.bias-flag-on {
+  background-color: #1c3829;
+  color: #4ade80;
+  border: 1px solid #16a34a;
+}
+
+.bias-flag-off {
+  background-color: #16181f;
+  color: #475569;
+  border: 1px solid #2d3148;
+}
+
+.bias-text {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+.bias-invalidation {
+  font-size: 0.82rem;
+  color: #f87171;
+  background-color: #2d0d0d;
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-top: 8px;
+}
+
+.bias-created {
+  font-size: 0.75rem;
+  color: #475569;
+  margin-top: 10px;
+}
+
+/* ─── Lista de Trades ─────────────────────────── */
+
+.trade-item {
+  border: 1px solid #2d3148;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.trade-item:last-child {
+  margin-bottom: 0;
+}
+
+.badge-long {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background-color: #1c3829;
+  color: #4ade80;
+  border: 1px solid #16a34a;
+}
+
+.badge-short {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background-color: #2d0d0d;
+  color: #f87171;
+  border: 1px solid #dc2626;
+}
+
+.result-positive {
+  color: #4ade80;
+  font-weight: 700;
+}
+
+.result-negative {
+  color: #f87171;
+  font-weight: 700;
+}
+
+.result-neutral {
+  color: #475569;
+}
+
+/* ─── Metrics Grid ─────────────────────────────── */
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.metric-card {
+  background-color: #0f1117;
+  border: 1px solid #2d3148;
+  border-radius: 8px;
+  padding: 12px 8px;
+  text-align: center;
+}
+
+.metric-label {
+  display: block;
+  font-size: 0.65rem;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.metric-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.metric-value-positive { color: #4ade80; }
+.metric-value-negative { color: #f87171; }
+.metric-value-neutral  { color: #475569; }
+
+.empty-state {
+  font-size: 0.9rem;
+  color: #475569;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* ─── Imágenes de Trades ───────────────────────── */
+
+.trade-images {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.trade-image-link {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background-color: #0f1117;
+  border: 1px solid #3b82f6;
+  color: #60a5fa;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.trade-image-link:hover {
+  background-color: #1e3a5f;
+}
+
+/* ─── Filtros de Trades ────────────────────────── */
+
+.trade-filters {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #2d3148;
+}
+
+.filter-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 90px;
+}
+
+.filter-group label {
+  font-size: 0.68rem;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.filter-group select {
+  background-color: #0f1117;
+  border: 1px solid #2d3148;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.78rem;
+  color: #e2e8f0;
+  font-family: inherit;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.filter-group select:focus {
+  border-color: #3b82f6;
+}
+
+.trades-count {
+  font-size: 0.75rem;
+  color: #475569;
+  margin-top: 10px;
+  text-align: right;
+}

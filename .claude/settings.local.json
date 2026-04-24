@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl *)",
+      "Bash(gh repo *)",
+      "Bash(pip show *)",
+      "Bash(pip index *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:pypi.org)",
+      "Bash(python -m pip --version)",
+      "Bash(python *)",
+      "Bash(C:/Users/rober/AppData/Local/Python/pythoncore-3.14-64/Scripts/code-review-graph.exe install *)",
+      "Bash(C:/Users/rober/AppData/Local/Python/pythoncore-3.14-64/Scripts/code-review-graph.exe build *)",
+      "Bash(uvx *)",
+      "Bash(claude --version)",
+      "Bash(claude plugin *)",
+      "Bash(backend/.venv/Scripts/python.exe -c \"import requests; print\\('ok'\\)\")",
+      "Bash(pip install *)",
+      "Bash(backend/.venv/Scripts/pip.exe install *)",
+      "Bash(backend/.venv/Scripts/python.exe *)",
+      "Bash(.venv/Scripts/uvicorn.exe app.main:app --host 127.0.0.1 --port 8000)"
+    ]
+  },
+  "disabledMcpjsonServers": [
+    "code-review-graph"
+  ]
+}

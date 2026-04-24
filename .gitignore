@@ -1,0 +1,8 @@
+# Added by code-review-graph
+.code-review-graph/
+.venv/
+backend/.venv/
+__pycache__/
+*.pyc
+.env
+node_modules/

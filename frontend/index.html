@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trading Journal</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Trading Journal</h1>
+        <p class="subtitle">
+          Registro personal de trades — disciplina, ejecución y aprendizaje.
+        </p>
+      </header>
+
+      <!-- Estado del Backend -->
+      <section class="card">
+        <h2>Estado del Backend</h2>
+        <p>Pulsa el botón para verificar que el servidor está corriendo.</p>
+        <button id="testBtn" onclick="testConnection()">
+          Test Backend Connection
+        </button>
+        <div id="result" class="result hidden"></div>
+      </section>
+
+      <!-- Resumen del Journal -->
+      <section class="card">
+        <h2>Resumen del Journal</h2>
+        <div id="metricsSummary">
+          <p class="empty-state">Cargando...</p>
+        </div>
+      </section>
+
+      <!-- Crear Trading Day -->
+      <section class="card">
+        <h2>Crear Trading Day</h2>
+        <p>Registra un nuevo día con sus condiciones de mercado.</p>
+
+        <form id="tradingDayForm" onsubmit="saveTradingDay(event)">
+          <div class="form-group">
+            <label for="trade_date">Fecha</label>
+            <input type="date" id="trade_date" required />
+          </div>
+
+          <div class="form-group">
+            <label for="market">Mercado</label>
+            <input type="text" id="market" placeholder="Ej: NQ, ES, MNQ" required />
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" id="is_news_day" />
+              Día de noticias
+            </label>
+            <label>
+              <input type="checkbox" id="is_ath_context" />
+              Contexto ATH
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Notas</label>
+            <textarea id="notes" placeholder="Observaciones del día..." rows="3"></textarea>
+          </div>
+
+          <button type="submit" id="saveBtn">Guardar Trading Day</button>
+          <div id="formMsg" class="result hidden"></div>
+        </form>
+      </section>
+
+      <!-- Trading Days Registrados -->
+      <section class="card">
+        <h2>Trading Days Registrados</h2>
+        <div id="tradingDaysList">
+          <p class="empty-state">Cargando...</p>
+        </div>
+      </section>
+
+      <!-- Crear Daily Bias -->
+      <section class="card">
+        <h2>Crear Daily Bias</h2>
+        <p>Responde las preguntas. El bias se calcula automáticamente.</p>
+
+        <form id="dailyBiasForm" onsubmit="saveDailyBias(event)">
+
+          <div class="form-group">
+            <label for="bias_trading_day_id">Trading Day</label>
+            <select id="bias_trading_day_id" required>
+              <option value="">— Selecciona un trading day —</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="price_zone">¿Dónde está el precio?</label>
+            <select id="price_zone" required>
+              <option value="">— Selecciona —</option>
+              <option value="premium">Premium</option>
+              <option value="discount">Discount</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="pending_liquidity">¿Qué liquidez está pendiente?</label>
+            <select id="pending_liquidity" required>
+              <option value="">— Selecciona —</option>
+              <option value="highs">Highs</option>
+              <option value="lows">Lows</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="had_sweep">¿Hubo sweep?</label>
+            <select id="had_sweep" required>
+              <option value="">— Selecciona —</option>
+              <option value="yes">Sí</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="had_reaction">¿Hubo reacción fuerte?</label>
+            <select id="had_reaction" required>
+              <option value="">— Selecciona —</option>
+              <option value="yes">Sí</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="bias_comments">Comentarios</label>
+            <textarea id="bias_comments" placeholder="Notas del bias..." rows="2"></textarea>
+          </div>
+
+          <button type="button" id="toggleAdvancedBtn" onclick="toggleAdvanced()">
+            Mostrar campos avanzados
+          </button>
+
+          <div id="advancedFields" class="advanced-fields hidden">
+
+            <p class="form-section-label">Precios</p>
+            <div class="form-cols">
+              <div class="form-group">
+                <label for="bias_daily_high">Daily High</label>
+                <input type="number" id="bias_daily_high" step="0.01" value="0" />
+              </div>
+              <div class="form-group">
+                <label for="bias_daily_low">Daily Low</label>
+                <input type="number" id="bias_daily_low" step="0.01" value="0" />
+              </div>
+              <div class="form-group">
+                <label for="bias_daily_eq">Daily EQ</label>
+                <input type="number" id="bias_daily_eq" step="0.01" value="0" />
+              </div>
+              <div class="form-group">
+                <label for="bias_current_price">Current Price</label>
+                <input type="number" id="bias_current_price" step="0.01" value="0" />
+              </div>
+            </div>
+
+            <p class="form-section-label">Sesión Asia</p>
+            <div class="form-cols">
+              <div class="form-group">
+                <label for="bias_asia_high">Asia High</label>
+                <input type="number" id="bias_asia_high" step="0.01" value="0" />
+              </div>
+              <div class="form-group">
+                <label for="bias_asia_low">Asia Low</label>
+                <input type="number" id="bias_asia_low" step="0.01" value="0" />
+              </div>
+            </div>
+
+            <p class="form-section-label">Sesión Londres</p>
+            <div class="form-cols">
+              <div class="form-group">
+                <label for="bias_london_high">London High</label>
+                <input type="number" id="bias_london_high" step="0.01" value="0" />
+              </div>
+              <div class="form-group">
+                <label for="bias_london_low">London Low</label>
+                <input type="number" id="bias_london_low" step="0.01" value="0" />
+              </div>
+            </div>
+
+            <p class="form-section-label">Análisis</p>
+            <div class="form-group">
+              <label for="bias_zone_position">Zone Position</label>
+              <select id="bias_zone_position">
+                <option value="none">None</option>
+                <option value="premium">Premium</option>
+                <option value="discount">Discount</option>
+                <option value="equilibrium">Equilibrium</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="bias_pending_liquidity_direction">Pending Liquidity Direction</label>
+              <select id="bias_pending_liquidity_direction">
+                <option value="none">None</option>
+                <option value="bullish">Bullish</option>
+                <option value="bearish">Bearish</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="bias_premium_discount_direction">Premium/Discount Direction</label>
+              <select id="bias_premium_discount_direction">
+                <option value="none">None</option>
+                <option value="bullish">Bullish</option>
+                <option value="bearish">Bearish</option>
+              </select>
+            </div>
+
+            <p class="form-section-label">Estado</p>
+            <div class="form-group checkbox-group">
+              <label>
+                <input type="checkbox" id="bias_chop_equilibrium" />
+                Chop / Equilibrium
+              </label>
+              <label>
+                <input type="checkbox" id="bias_invalidated" />
+                Invalidado
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label for="bias_invalidation_reason">Razón de invalidación</label>
+              <textarea id="bias_invalidation_reason" placeholder="Solo si está invalidado..." rows="2"></textarea>
+            </div>
+
+          </div>
+
+          <button type="submit" id="saveBiasBtn">Guardar Daily Bias</button>
+          <div id="biasFormMsg" class="result hidden"></div>
+        </form>
+      </section>
+
+      <!-- Daily Bias Registrados -->
+      <section class="card">
+        <h2>Daily Bias Registrados</h2>
+        <div id="dailyBiasList">
+          <p class="empty-state">Cargando...</p>
+        </div>
+      </section>
+
+      <!-- Crear Trade -->
+      <section class="card">
+        <h2>Crear Trade</h2>
+        <p>Registra una operación real asociada a un día y un bias.</p>
+
+        <form id="tradeForm" onsubmit="saveTrade(event)">
+
+          <div class="form-group">
+            <label for="trade_trading_day_id">Trading Day</label>
+            <select id="trade_trading_day_id" required>
+              <option value="">— Selecciona un trading day —</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="trade_daily_bias_id">Daily Bias</label>
+            <select id="trade_daily_bias_id">
+              <option value="">— Ninguno —</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="trade_direction">Dirección</label>
+            <select id="trade_direction" required>
+              <option value="">— Selecciona —</option>
+              <option value="long">Long</option>
+              <option value="short">Short</option>
+            </select>
+          </div>
+
+          <p class="form-section-label">Confirmaciones</p>
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" id="trade_sweep_confirmed" />
+              Sweep confirmado
+            </label>
+            <label>
+              <input type="checkbox" id="trade_pda_confirmed" />
+              Confirmó PDA HTF
+            </label>
+            <label>
+              <input type="checkbox" id="trade_ifvg_confirmed" />
+              iFVG confirmado
+            </label>
+            <label>
+              <input type="checkbox" id="trade_vshape_confirmed" />
+              V-Shape confirmado
+            </label>
+            <label>
+              <input type="checkbox" id="trade_smt_confirmed" />
+              SMT confirmado
+            </label>
+            <label>
+              <input type="checkbox" id="trade_clean_reaction" />
+              Reacción limpia
+            </label>
+            <label>
+              <input type="checkbox" id="trade_ny_killzone" />
+              Dentro de Killzone NY
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="trade_liquidity_type">Tipo de liquidez</label>
+            <select id="trade_liquidity_type">
+              <option value="">— Opcional —</option>
+              <option value="asia">Asia</option>
+              <option value="london">London</option>
+              <option value="pdh">PDH</option>
+              <option value="pdl">PDL</option>
+              <option value="h4">H4</option>
+              <option value="h1">H1</option>
+              <option value="ny_am">NY AM</option>
+              <option value="equal_highs_lows">Equal Highs/Lows</option>
+              <option value="news">News</option>
+              <option value="nwog">NWOG</option>
+              <option value="ndog">NDOG</option>
+              <option value="ath">ATH</option>
+              <option value="daily_50">Daily 50%</option>
+              <option value="internal">Internal</option>
+              <option value="micro">Micro</option>
+              <option value="other">Otro</option>
+            </select>
+          </div>
+
+          <p class="form-section-label">Precios</p>
+          <div class="form-cols">
+            <div class="form-group">
+              <label for="trade_entry_price">Entry Price</label>
+              <input type="number" id="trade_entry_price" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label for="trade_stop_loss">Stop Loss</label>
+              <input type="number" id="trade_stop_loss" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label for="trade_take_profit">Take Profit</label>
+              <input type="number" id="trade_take_profit" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label for="trade_result_r">Result (R)</label>
+              <input type="number" id="trade_result_r" step="0.01" placeholder="Opcional" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="trade_notes">Notas</label>
+            <textarea id="trade_notes" placeholder="Observaciones del trade..." rows="2"></textarea>
+          </div>
+
+          <p class="form-section-label">Psicología</p>
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" id="trade_followed_rules" />
+              ¿Seguí mis reglas?
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="trade_emotional_state">Estado emocional</label>
+            <select id="trade_emotional_state">
+              <option value="">— Opcional —</option>
+              <option value="calmado">Calmado</option>
+              <option value="ansioso">Ansioso</option>
+              <option value="fomo">FOMO</option>
+              <option value="frustrado">Frustrado</option>
+              <option value="neutral">Neutral</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="trade_exit_reason">Salida</label>
+            <select id="trade_exit_reason">
+              <option value="">— Opcional —</option>
+              <option value="por_plan">Por plan</option>
+              <option value="por_miedo">Por miedo</option>
+              <option value="por_impulso">Por impulso</option>
+              <option value="manual">Manual</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+
+          <p class="form-section-label">Imagen</p>
+          <div class="form-group">
+            <label for="trade_image_url">URL de imagen (opcional)</label>
+            <input type="url" id="trade_image_url" placeholder="https://..." />
+          </div>
+          <div class="form-group">
+            <label for="trade_image_type">Tipo de imagen</label>
+            <select id="trade_image_type">
+              <option value="entrada">Entrada</option>
+              <option value="salida">Salida</option>
+              <option value="contexto">Contexto</option>
+            </select>
+          </div>
+
+          <button type="submit" id="saveTradeBtn">Guardar Trade</button>
+          <div id="tradeFormMsg" class="result hidden"></div>
+        </form>
+      </section>
+
+      <!-- Trades Registrados -->
+      <section class="card">
+        <h2>Trades Registrados</h2>
+        <div class="trade-filters">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label for="filter_setup">Setup</label>
+              <select id="filter_setup" onchange="applyTradeFilters()">
+                <option value="">Todos</option>
+                <option value="valid">Setup válido</option>
+                <option value="invalid">Setup inválido</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filter_disciplina">Disciplina</label>
+              <select id="filter_disciplina" onchange="applyTradeFilters()">
+                <option value="">Todos</option>
+                <option value="disciplinado">Trade disciplinado</option>
+                <option value="error">Error de disciplina</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filter_emocion">Emoción</label>
+              <select id="filter_emocion" onchange="applyTradeFilters()">
+                <option value="">Todas</option>
+                <option value="fomo">FOMO</option>
+                <option value="ansioso">Ansiedad</option>
+                <option value="calmado">Calmado</option>
+                <option value="neutral">Neutral</option>
+                <option value="frustrado">Frustrado</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filter_resultado">Resultado</label>
+              <select id="filter_resultado" onchange="applyTradeFilters()">
+                <option value="">Todos</option>
+                <option value="ganador">Ganadores</option>
+                <option value="perdedor">Perdedores</option>
+                <option value="be">BE / 0R</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filter_mercado">Mercado</label>
+              <select id="filter_mercado" onchange="applyTradeFilters()">
+                <option value="">Todos</option>
+              </select>
+            </div>
+          </div>
+          <p id="tradesCount" class="trades-count"></p>
+        </div>
+        <div id="tradesList">
+          <p class="empty-state">Cargando...</p>
+        </div>
+      </section>
+
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
