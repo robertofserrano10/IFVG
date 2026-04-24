@@ -492,9 +492,25 @@ async function saveTrade(event) {
       throw new Error(result.detail || `Error ${response.status}`);
     }
 
-    const imageUrl = document.getElementById("trade_image_url").value.trim();
-    if (imageUrl) {
-      const imageType = document.getElementById("trade_image_type").value || "entrada";
+    const imageFile = document.getElementById("trade_image_file").files?.[0];
+    const imageUrl  = document.getElementById("trade_image_url").value.trim();
+    const imageType = document.getElementById("trade_image_type").value || "entrada";
+
+    if (imageFile) {
+      const fd = new FormData();
+      fd.append("trade_id",   result.id);
+      fd.append("image_type", imageType);
+      fd.append("file",       imageFile);
+      const upResp = await fetch(`${BACKEND_URL}/trade-images/upload`, { method: "POST", body: fd });
+      if (upResp.ok) {
+        const img = await upResp.json();
+        const preview = document.getElementById("trade_image_file_preview");
+        if (preview) {
+          preview.innerHTML = `<img src="${escapeHtml(img.image_url)}" alt="imagen subida" style="max-width:100%;border-radius:6px;margin-top:8px;" />`;
+          preview.classList.remove("hidden");
+        }
+      }
+    } else if (imageUrl) {
       await fetch(`${BACKEND_URL}/trade-images`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -19,7 +19,8 @@
       "Bash(pip install *)",
       "Bash(backend/.venv/Scripts/pip.exe install *)",
       "Bash(backend/.venv/Scripts/python.exe *)",
-      "Bash(.venv/Scripts/uvicorn.exe app.main:app --host 127.0.0.1 --port 8000)"
+      "Bash(.venv/Scripts/uvicorn.exe app.main:app --host 127.0.0.1 --port 8000)",
+      "Bash(backend/.venv/Scripts/pip.exe list *)"
     ]
   },
   "disabledMcpjsonServers": [

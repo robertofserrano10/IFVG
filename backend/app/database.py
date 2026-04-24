@@ -37,3 +37,13 @@ def get_supabase_client() -> Client:
 
     client: Client = create_client(url, settings.supabase_anon_key)
     return client
+
+
+def get_storage_client() -> Client:
+    if not settings.supabase_url:
+        raise ValueError("Falta SUPABASE_URL en el archivo .env.")
+    url = settings.supabase_url.rstrip("/")
+    key = settings.supabase_service_role_key or settings.supabase_anon_key
+    if not key:
+        raise ValueError("Falta SUPABASE_ANON_KEY o SUPABASE_SERVICE_ROLE_KEY en el .env.")
+    return create_client(url, key)
