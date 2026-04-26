@@ -148,6 +148,21 @@ async function saveTradingDay(event) {
     notes: notesValue || null,
   };
 
+  if (!payload.trade_date) {
+    msgBox.textContent = "La fecha es obligatoria.";
+    msgBox.className = "result error";
+    btn.disabled = false;
+    btn.textContent = "Guardar Trading Day";
+    return;
+  }
+  if (!payload.market) {
+    msgBox.textContent = "El mercado es obligatorio.";
+    msgBox.className = "result error";
+    btn.disabled = false;
+    btn.textContent = "Guardar Trading Day";
+    return;
+  }
+
   try {
     const response = await fetch(`${BACKEND_URL}/trading-days`, {
       method: "POST",
@@ -327,6 +342,14 @@ async function saveDailyBias(event) {
     invalidation_reason:         document.getElementById("bias_invalidation_reason").value.trim() || null,
   };
 
+  if (!payload.trading_day_id || isNaN(payload.trading_day_id)) {
+    msgBox.textContent = "Debes seleccionar un Trading Day.";
+    msgBox.className = "result error";
+    btn.disabled = false;
+    btn.textContent = "Guardar Daily Bias";
+    return;
+  }
+
   try {
     const response = await fetch(`${BACKEND_URL}/daily-bias`, {
       method: "POST",
@@ -479,6 +502,14 @@ async function saveTrade(event) {
     emotional_state:  document.getElementById("trade_emotional_state").value || null,
     exit_reason:      document.getElementById("trade_exit_reason").value || null,
   };
+
+  if (!payload.trading_day_id || isNaN(payload.trading_day_id)) {
+    msgBox.textContent = "Debes seleccionar un Trading Day.";
+    msgBox.className = "result error";
+    btn.disabled = false;
+    btn.textContent = "Guardar Trade";
+    return;
+  }
 
   try {
     const response = await fetch(`${BACKEND_URL}/trades`, {
@@ -807,14 +838,23 @@ function formatDateTime(isoString) {
 // ─── PDF Reports ─────────────────────────────────────────────────────────────
 
 async function downloadMonthlyPDF() {
-  const year  = document.getElementById("pdf_year").value;
-  const month = document.getElementById("pdf_month").value;
-  const msg   = document.getElementById("pdfMsg");
-  if (!year || !month) return;
+  const yearVal  = parseInt(document.getElementById("pdf_year").value);
+  const monthVal = parseInt(document.getElementById("pdf_month").value);
+  const msg      = document.getElementById("pdfMsg");
+  if (!yearVal || !monthVal) {
+    msg.textContent = "Selecciona año y mes.";
+    msg.className = "result error";
+    return;
+  }
+  if (yearVal < 2000 || yearVal > 2100) {
+    msg.textContent = "Año inválido. Debe estar entre 2000 y 2100.";
+    msg.className = "result error";
+    return;
+  }
   try {
     msg.textContent = "Generando PDF...";
     msg.className = "result";
-    const url = `${BACKEND_URL}/reports/monthly/pdf?year=${year}&month=${month}`;
+    const url = `${BACKEND_URL}/reports/monthly/pdf?year=${yearVal}&month=${monthVal}`;
     window.open(url, "_blank");
     msg.textContent = "PDF generado.";
     msg.className = "result success";

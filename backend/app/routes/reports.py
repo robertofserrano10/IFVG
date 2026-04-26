@@ -1,3 +1,4 @@
+import re
 from collections import defaultdict
 
 from fastapi import APIRouter, HTTPException
@@ -5,6 +6,10 @@ from fastapi.responses import Response
 from fpdf import FPDF
 
 from app.database import get_supabase_client
+
+
+def _safe_err(e: Exception) -> str:
+    return re.sub(r'eyJ[A-Za-z0-9\-_]{10,}', '[REDACTED]', str(e))
 
 router = APIRouter()
 
@@ -72,6 +77,10 @@ class _PDF(FPDF):
 
 @router.get("/reports/monthly/pdf")
 def get_monthly_pdf(year: int, month: int):
+    if not (2000 <= year <= 2100):
+        raise HTTPException(status_code=400, detail="Año inválido. Debe estar entre 2000 y 2100.")
+    if not (1 <= month <= 12):
+        raise HTTPException(status_code=400, detail="Mes inválido. Debe estar entre 1 y 12.")
     try:
         client = get_supabase_client()
 
@@ -256,4 +265,4 @@ def get_monthly_pdf(year: int, month: int):
             },
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=_safe_err(e))

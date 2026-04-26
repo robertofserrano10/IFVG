@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timezone
 from typing import List
 
@@ -8,8 +9,13 @@ from app.schemas.trade_image import TradeImageCreate, TradeImageResponse
 
 router = APIRouter()
 
-_ALLOWED_TYPES = {"image/png", "image/jpeg", "image/jpg"}
+_ALLOWED_TYPES       = {"image/png", "image/jpeg", "image/jpg"}
+_ALLOWED_IMAGE_TYPES = {"entrada", "salida", "contexto"}
 _MAX_BYTES = 5 * 1024 * 1024  # 5 MB
+
+
+def _safe_err(e: Exception) -> str:
+    return re.sub(r'eyJ[A-Za-z0-9\-_]{10,}', '[REDACTED]', str(e))
 
 
 # ─────────────────────────────────
@@ -27,7 +33,7 @@ def get_trade_images():
         )
         return response.data
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=_safe_err(e))
 
 
 # ─────────────────────────────────
@@ -40,7 +46,7 @@ def create_trade_image(payload: TradeImageCreate):
         response = client.table("trade_images").insert(payload.model_dump()).execute()
         return response.data[0]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=_safe_err(e))
 
 
 # ─────────────────────────────────
@@ -56,6 +62,12 @@ async def upload_trade_image(
         raise HTTPException(
             status_code=400,
             detail="Solo se permiten imagenes PNG o JPEG.",
+        )
+
+    if image_type not in _ALLOWED_IMAGE_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail="image_type inválido. Use: entrada, salida o contexto.",
         )
 
     content = await file.read()
@@ -108,4 +120,4 @@ async def upload_trade_image(
         return insert_response.data[0]
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=_safe_err(e))

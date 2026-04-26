@@ -33,7 +33,9 @@
       "Bash(taskkill //PID 13708 //F)",
       "Bash(.venv/Scripts/python.exe -c ' *)",
       "Bash(taskkill //PID 15444 //F)",
-      "Bash(.venv/Scripts/python.exe /c/Users/rober/Documents/fvgproyecto/scripts/test_phase_18.py)"
+      "Bash(.venv/Scripts/python.exe /c/Users/rober/Documents/fvgproyecto/scripts/test_phase_18.py)",
+      "Bash(git rm *)",
+      "Bash(taskkill *)"
     ]
   },
   "disabledMcpjsonServers": [
