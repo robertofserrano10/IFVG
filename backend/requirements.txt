@@ -4,3 +4,4 @@ python-dotenv==1.0.1
 pydantic-settings==2.6.1
 supabase==2.10.0
 python-multipart==0.0.26
+fpdf2>=2.7.0

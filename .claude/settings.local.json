@@ -27,7 +27,13 @@
       "Read(//c/Users/rober/AppData/Local/Programs/**)",
       "Read(//c/Users/rober/**)",
       "Bash(/c/Users/rober/Documents/fvgproyecto/backend/.venv/Scripts/python.exe *)",
-      "Bash(.venv/Scripts/python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000)"
+      "Bash(.venv/Scripts/python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000)",
+      "Bash(/c/Users/rober/Documents/fvgproyecto/backend/.venv/Scripts/pip.exe install *)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //PID 13708 //F)",
+      "Bash(.venv/Scripts/python.exe -c ' *)",
+      "Bash(taskkill //PID 15444 //F)",
+      "Bash(.venv/Scripts/python.exe /c/Users/rober/Documents/fvgproyecto/scripts/test_phase_18.py)"
     ]
   },
   "disabledMcpjsonServers": [

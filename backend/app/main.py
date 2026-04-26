@@ -11,6 +11,7 @@ from app.routes.daily_bias import router as daily_bias_router
 from app.routes.trades import router as trades_router
 from app.routes.metrics import router as metrics_router
 from app.routes.trade_images import router as trade_images_router
+from app.routes.reports import router as reports_router
 
 app = FastAPI(
     title="Trading Journal API",
@@ -38,3 +39,4 @@ app.include_router(daily_bias_router)
 app.include_router(trades_router)
 app.include_router(metrics_router)
 app.include_router(trade_images_router)
+app.include_router(reports_router)

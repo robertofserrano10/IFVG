@@ -764,6 +764,27 @@ function formatDateTime(isoString) {
   });
 }
 
+// ─── PDF Reports ─────────────────────────────────────────────────────────────
+
+async function downloadMonthlyPDF() {
+  const year  = document.getElementById("pdf_year").value;
+  const month = document.getElementById("pdf_month").value;
+  const msg   = document.getElementById("pdfMsg");
+  if (!year || !month) return;
+  try {
+    msg.textContent = "Generando PDF...";
+    msg.className = "result";
+    const url = `${BACKEND_URL}/reports/monthly/pdf?year=${year}&month=${month}`;
+    window.open(url, "_blank");
+    msg.textContent = "PDF generado.";
+    msg.className = "result success";
+    setTimeout(() => msg.classList.add("hidden"), 3000);
+  } catch (err) {
+    msg.textContent = `Error: ${err.message}`;
+    msg.className = "result error";
+  }
+}
+
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, "&amp;")
