@@ -14,6 +14,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadTrades();
 });
 
+// ─── Navegación por secciones ─────────────────────────────────────────────────
+
+function showSection(sectionId) {
+  document.querySelectorAll(".app-section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+
+  const section = document.getElementById("section-" + sectionId);
+  if (section) section.classList.add("active");
+
+  const navItem = document.querySelector(`[data-section="${sectionId}"]`);
+  if (navItem) navItem.classList.add("active");
+}
+
 // ─── Metrics ─────────────────────────────────────────────────────────────────
 
 async function loadMetrics() {
@@ -177,7 +190,7 @@ async function saveTradingDay(event) {
 
     msgBox.textContent = "Trading day guardado correctamente.";
     msgBox.className = "result success";
-    document.getElementById("tradingDayForm").reset();
+    document.getElementById("trading_day_form").reset();
     await loadTradingDays();
   } catch (error) {
     msgBox.textContent = `Error al guardar: ${error.message}`;
@@ -551,7 +564,7 @@ async function saveTrade(event) {
 
     msgBox.textContent = "Trade guardado correctamente.";
     msgBox.className = "result success";
-    document.getElementById("tradeForm").reset();
+    document.getElementById("trade_form").reset();
     await loadTrades();
   } catch (error) {
     msgBox.textContent = `Error al guardar: ${error.message}`;

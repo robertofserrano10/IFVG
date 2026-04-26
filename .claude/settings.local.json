@@ -35,7 +35,9 @@
       "Bash(taskkill //PID 15444 //F)",
       "Bash(.venv/Scripts/python.exe /c/Users/rober/Documents/fvgproyecto/scripts/test_phase_18.py)",
       "Bash(git rm *)",
-      "Bash(taskkill *)"
+      "Bash(taskkill *)",
+      "Bash(backend/.venv/Scripts/python *)",
+      "Bash(.venv/Scripts/uvicorn app.main:app --port 8000 --timeout-keep-alive 2)"
     ]
   },
   "disabledMcpjsonServers": [
