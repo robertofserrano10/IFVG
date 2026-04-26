@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from fastapi import APIRouter, HTTPException
 
 from app.database import get_supabase_client
@@ -111,6 +113,54 @@ def get_metrics():
         if not insights:
             insights.append("No hay suficientes datos para generar insights")
 
+        # ── fase 17: discipline tracking ──────────────────────────────────────
+        day_counts = defaultdict(int)
+        for t in trades:
+            if t.get("trading_day_id") is not None:
+                day_counts[t["trading_day_id"]] += 1
+
+        overtrading_days   = sum(1 for cnt in day_counts.values() if cnt > 2)
+        avg_trades_per_day = round(len(trades) / len(day_counts), 2) if day_counts else 0.0
+
+        sorted_r = [t["result_r"] for t in sorted(
+            [t for t in trades if t.get("result_r") is not None],
+            key=lambda t: t.get("created_at", ""),
+        )]
+
+        max_win_streak = max_loss_streak = cur_win = cur_loss = 0
+        for r in sorted_r:
+            if r > 0:
+                cur_win  += 1; cur_loss  = 0
+                max_win_streak  = max(max_win_streak,  cur_win)
+            elif r < 0:
+                cur_loss += 1; cur_win   = 0
+                max_loss_streak = max(max_loss_streak, cur_loss)
+            else:
+                cur_win = cur_loss = 0
+
+        if sorted_r:
+            current_streak = cur_win if sorted_r[-1] > 0 else (-cur_loss if sorted_r[-1] < 0 else 0)
+        else:
+            current_streak = 0
+
+        total            = len(trades)
+        disciplined_cnt  = sum(1 for t in trades if t.get("setup_valid") and t.get("followed_rules") is True)
+        rule_break_cnt   = sum(1 for t in trades if t.get("followed_rules") is False)
+        disciplined_ratio = round(disciplined_cnt  / total, 2) if total else 0.0
+        rule_break_rate   = round(rule_break_cnt   / total, 2) if total else 0.0
+
+        discipline_alerts = []
+        if overtrading_days > 2:
+            discipline_alerts.append("Estás sobreoperando")
+        if rule_break_rate > 0.3:
+            discipline_alerts.append("Estás rompiendo tus reglas frecuentemente")
+        if max_loss_streak >= 3:
+            discipline_alerts.append("Estás en racha negativa")
+        if disciplined_ratio < 0.5:
+            discipline_alerts.append("Baja disciplina detectada")
+        if not discipline_alerts:
+            discipline_alerts.append("Disciplina estable")
+
         return {
             # ── existing ─────────────────────────────────────────────────────
             "total_trades":               len(trades),
@@ -156,6 +206,16 @@ def get_metrics():
             "winrate_ansiedad":            wn_ans,
             "winrate_frustracion":         wn_frus,
             "performance_insights":        insights,
+
+            # ── fase 17: discipline tracking ─────────────────────────────────
+            "overtrading_days":    overtrading_days,
+            "avg_trades_per_day":  avg_trades_per_day,
+            "max_win_streak":      max_win_streak,
+            "max_loss_streak":     max_loss_streak,
+            "current_streak":      current_streak,
+            "disciplined_ratio":   disciplined_ratio,
+            "rule_break_rate":     rule_break_rate,
+            "discipline_alerts":   discipline_alerts,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
