@@ -33,6 +33,9 @@ def _grade(t):
     return "F"
 
 
+_LIQ_TYPES = ["asia", "london", "pdh", "pdl", "nwog", "ndog", "ny_am", "other"]
+
+
 @router.get("/metrics")
 def get_metrics():
     try:
@@ -42,6 +45,71 @@ def get_metrics():
         valid   = [t for t in trades if t.get("setup_valid")]
         all_r   = [t["result_r"] for t in trades if t.get("result_r") is not None]
         valid_r = [t["result_r"] for t in valid  if t.get("result_r") is not None]
+
+        # ── fase 16: performance data ─────────────────────────────────────────
+        winrate_by_liquidity = {
+            lt: _winrate([t["result_r"] for t in trades
+                          if t.get("liquidity_type") == lt and t.get("result_r") is not None])
+            for lt in _LIQ_TYPES
+        }
+
+        nyk_r    = [t["result_r"] for t in trades if     t.get("ny_killzone") and t.get("result_r") is not None]
+        no_nyk_r = [t["result_r"] for t in trades if not t.get("ny_killzone") and t.get("result_r") is not None]
+        cr_r     = [t["result_r"] for t in trades if     t.get("clean_reaction") and t.get("result_r") is not None]
+        no_cr_r  = [t["result_r"] for t in trades if not t.get("clean_reaction") and t.get("result_r") is not None]
+        fomo_r   = [t["result_r"] for t in trades if t.get("emotional_state") == "fomo"      and t.get("result_r") is not None]
+        ans_r    = [t["result_r"] for t in trades if t.get("emotional_state") == "ansioso"   and t.get("result_r") is not None]
+        frus_r   = [t["result_r"] for t in trades if t.get("emotional_state") == "frustrado" and t.get("result_r") is not None]
+
+        wn_nyk    = _winrate(nyk_r)
+        wn_no_nyk = _winrate(no_nyk_r)
+        wn_cr     = _winrate(cr_r)
+        wn_no_cr  = _winrate(no_cr_r)
+        wn_fomo   = _winrate(fomo_r)
+        wn_ans    = _winrate(ans_r)
+        wn_frus   = _winrate(frus_r)
+
+        # ── fase 16: insights ────────────────────────────────────────────────
+        insights = []
+        overall  = _winrate(all_r)
+
+        if len(nyk_r) >= 2 and len(no_nyk_r) >= 2:
+            diff = wn_nyk - wn_no_nyk
+            if abs(diff) > 10:
+                insights.append("Tu winrate es mayor en NY Killzone" if diff > 0
+                                 else "Tu winrate es menor en NY Killzone")
+
+        if len(cr_r) >= 2 and len(no_cr_r) >= 2:
+            diff = wn_cr - wn_no_cr
+            if abs(diff) > 10:
+                insights.append("Tus resultados mejoran con clean reaction" if diff > 0
+                                 else "Pierdes más cuando no hay clean reaction")
+
+        if len(fomo_r) >= 2 and all_r:
+            diff = wn_fomo - overall
+            if abs(diff) > 10:
+                insights.append("FOMO reduce tu winrate" if diff < 0
+                                 else "Tu winrate no se ve afectado negativamente por FOMO")
+
+        if len(ans_r) >= 2 and all_r:
+            diff = wn_ans - overall
+            if abs(diff) > 10:
+                insights.append("La ansiedad reduce tu winrate" if diff < 0
+                                 else "La ansiedad no afecta negativamente tu winrate")
+
+        if len(frus_r) >= 2 and all_r:
+            diff = wn_frus - overall
+            if abs(diff) > 10:
+                insights.append("La frustración reduce tu winrate" if diff < 0
+                                 else "La frustración no afecta negativamente tu winrate")
+
+        liq_with_data = {lt: wr for lt, wr in winrate_by_liquidity.items() if wr > 0}
+        if len(liq_with_data) >= 2:
+            best_liq = max(liq_with_data, key=liq_with_data.get)
+            insights.append(f"Tus mejores resultados ocurren en {best_liq}")
+
+        if not insights:
+            insights.append("No hay suficientes datos para generar insights")
 
         return {
             # ── existing ─────────────────────────────────────────────────────
@@ -77,6 +145,17 @@ def get_metrics():
             "grade_b_trades":             sum(1 for t in trades if _grade(t) == "B"),
             "grade_c_trades":             sum(1 for t in trades if _grade(t) == "C"),
             "grade_f_trades":             sum(1 for t in trades if _grade(t) == "F"),
+
+            # ── fase 16: performance analysis ────────────────────────────────
+            "winrate_by_liquidity":        winrate_by_liquidity,
+            "winrate_ny_killzone":         wn_nyk,
+            "winrate_outside_ny_killzone": wn_no_nyk,
+            "winrate_clean_reaction":      wn_cr,
+            "winrate_unclean_reaction":    wn_no_cr,
+            "winrate_fomo":                wn_fomo,
+            "winrate_ansiedad":            wn_ans,
+            "winrate_frustracion":         wn_frus,
+            "performance_insights":        insights,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
