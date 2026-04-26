@@ -444,6 +444,9 @@
       <section class="card">
         <h2>Trades Registrados</h2>
         <div class="trade-filters">
+          <div class="search-wrapper">
+            <input type="text" id="trade_search" placeholder="Buscar por mercado, dirección, liquidez, notas..." oninput="applyTradeFilters()" />
+          </div>
           <div class="filter-row">
             <div class="filter-group">
               <label for="filter_setup">Setup</label>
@@ -454,11 +457,22 @@
               </select>
             </div>
             <div class="filter-group">
+              <label for="filter_grade">Grade</label>
+              <select id="filter_grade" onchange="applyTradeFilters()">
+                <option value="">Todos</option>
+                <option value="A+">A+</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="F">F</option>
+              </select>
+            </div>
+            <div class="filter-group">
               <label for="filter_disciplina">Disciplina</label>
               <select id="filter_disciplina" onchange="applyTradeFilters()">
                 <option value="">Todos</option>
-                <option value="disciplinado">Trade disciplinado</option>
-                <option value="error">Error de disciplina</option>
+                <option value="disciplinado">Disciplinado</option>
+                <option value="error">Error</option>
               </select>
             </div>
             <div class="filter-group">
@@ -485,6 +499,14 @@
               <label for="filter_mercado">Mercado</label>
               <select id="filter_mercado" onchange="applyTradeFilters()">
                 <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filter_killzone">NY Killzone</label>
+              <select id="filter_killzone" onchange="applyTradeFilters()">
+                <option value="">Todos</option>
+                <option value="si">Sí</option>
+                <option value="no">No</option>
               </select>
             </div>
           </div>

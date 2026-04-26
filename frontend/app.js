@@ -572,24 +572,37 @@ function populateMarketFilter() {
 
 function applyTradeFilters() {
   const setup      = document.getElementById("filter_setup")?.value      ?? "";
+  const grade      = document.getElementById("filter_grade")?.value      ?? "";
   const disciplina = document.getElementById("filter_disciplina")?.value ?? "";
   const emocion    = document.getElementById("filter_emocion")?.value    ?? "";
   const resultado  = document.getElementById("filter_resultado")?.value  ?? "";
   const mercado    = document.getElementById("filter_mercado")?.value    ?? "";
+  const killzone   = document.getElementById("filter_killzone")?.value   ?? "";
+  const search     = (document.getElementById("trade_search")?.value ?? "").toLowerCase().trim();
 
   let filtered = tradesCache;
 
+  if (search) {
+    filtered = filtered.filter(t => {
+      const day = tradingDaysCache.find(d => d.id === t.trading_day_id);
+      return [day?.market ?? "", t.direction ?? "", t.liquidity_type ?? "", t.notes ?? ""]
+        .join(" ").toLowerCase().includes(search);
+    });
+  }
+
   if (setup === "valid")   filtered = filtered.filter(t => t.setup_valid);
   if (setup === "invalid") filtered = filtered.filter(t => !t.setup_valid);
+
+  if (grade) filtered = filtered.filter(t => t.trade_grade === grade);
 
   if (disciplina === "disciplinado") filtered = filtered.filter(t => t.discipline_label === "Trade disciplinado");
   if (disciplina === "error")        filtered = filtered.filter(t => t.discipline_label === "Error de disciplina");
 
   if (emocion) filtered = filtered.filter(t => t.emotional_state === emocion);
 
-  if (resultado === "ganador")  filtered = filtered.filter(t => t.result_r !== null && t.result_r !== undefined && t.result_r > 0);
-  if (resultado === "perdedor") filtered = filtered.filter(t => t.result_r !== null && t.result_r !== undefined && t.result_r < 0);
-  if (resultado === "be")       filtered = filtered.filter(t => t.result_r !== null && t.result_r !== undefined && t.result_r === 0);
+  if (resultado === "ganador")  filtered = filtered.filter(t => t.result_r != null && t.result_r > 0);
+  if (resultado === "perdedor") filtered = filtered.filter(t => t.result_r != null && t.result_r < 0);
+  if (resultado === "be")       filtered = filtered.filter(t => t.result_r != null && t.result_r === 0);
 
   if (mercado) {
     filtered = filtered.filter(t => {
@@ -598,12 +611,15 @@ function applyTradeFilters() {
     });
   }
 
+  if (killzone === "si") filtered = filtered.filter(t => t.ny_killzone);
+  if (killzone === "no") filtered = filtered.filter(t => !t.ny_killzone);
+
   renderTrades(filtered);
 }
 
 function renderTrades(trades) {
-  const listEl   = document.getElementById("tradesList");
-  const countEl  = document.getElementById("tradesCount");
+  const listEl  = document.getElementById("tradesList");
+  const countEl = document.getElementById("tradesCount");
 
   if (countEl) {
     countEl.textContent = `Mostrando ${trades.length} de ${tradesCache.length} trades`;
@@ -616,139 +632,163 @@ function renderTrades(trades) {
     return;
   }
 
-  listEl.innerHTML = trades.map((trade) => {
-    const day = tradingDaysCache.find((d) => d.id === trade.trading_day_id);
-    const dayLabel = day
-      ? `${day.trade_date} — ${day.market}`
-      : `Trading Day #${trade.trading_day_id}`;
+  // Group by trading_day_id
+  const groups = new Map();
+  trades.forEach(t => {
+    const id = t.trading_day_id;
+    if (!groups.has(id)) groups.set(id, []);
+    groups.get(id).push(t);
+  });
 
-    const dirBadge = trade.direction === "long"
-      ? `<span class="badge-long">Long</span>`
-      : `<span class="badge-short">Short</span>`;
+  // Sort groups by date, newest first
+  const sortedGroups = [...groups.entries()].sort((a, b) => {
+    const dA = tradingDaysCache.find(d => d.id === a[0])?.trade_date ?? "";
+    const dB = tradingDaysCache.find(d => d.id === b[0])?.trade_date ?? "";
+    return dB > dA ? 1 : -1;
+  });
 
-    let resultHtml = "";
-    if (trade.result_r !== null && trade.result_r !== undefined) {
-      const cls = trade.result_r > 0
-        ? "result-positive"
-        : trade.result_r < 0
-        ? "result-negative"
-        : "result-neutral";
-      resultHtml = `<span class="bias-level-value ${cls}">${trade.result_r > 0 ? "+" : ""}${trade.result_r}R</span>`;
-    } else {
-      resultHtml = `<span class="bias-level-value result-neutral">—</span>`;
-    }
+  listEl.innerHTML = sortedGroups.map(([dayId, dayTrades]) => {
+    const day    = tradingDaysCache.find(d => d.id === dayId);
+    const dateStr = day?.trade_date ?? `Day #${dayId}`;
+    const market  = day?.market ?? "";
 
-    const notesHtml = trade.notes
-      ? `<p class="bias-text">${escapeHtml(trade.notes)}</p>`
+    const withR  = dayTrades.filter(t => t.result_r != null);
+    const wins   = withR.filter(t => t.result_r > 0).length;
+    const wr     = withR.length ? Math.round(wins / withR.length * 100) : null;
+    const avgR   = withR.length
+      ? (withR.reduce((s, t) => s + t.result_r, 0) / withR.length).toFixed(2)
+      : null;
+    const wrCls  = wr !== null ? (wr >= 50 ? "positive" : "negative") : "";
+    const avgCls = avgR !== null
+      ? (parseFloat(avgR) > 0 ? "positive" : parseFloat(avgR) < 0 ? "negative" : "")
       : "";
 
-    const typeLabels = { entrada: "Entrada", salida: "Salida", contexto: "Contexto" };
-    const tradeImages = tradeImagesCache.filter(img => img.trade_id === trade.id);
-    const imagesHtml = tradeImages.length
-      ? `<div class="trade-images">${tradeImages.map(img =>
-          `<a href="${escapeHtml(img.image_url)}" target="_blank" rel="noopener" class="trade-image-link">${typeLabels[img.image_type] || img.image_type}: Ver imagen</a>`
-        ).join("")}</div>`
-      : "";
+    const daySummary = `<div class="day-summary">
+      <span class="day-summary-item">${dayTrades.length} trade${dayTrades.length !== 1 ? "s" : ""}</span>
+      ${wr !== null ? `<span class="day-summary-item ${wrCls}">WR ${wr}%</span>` : ""}
+      ${avgR !== null ? `<span class="day-summary-item ${avgCls}">Avg ${parseFloat(avgR) > 0 ? "+" : ""}${avgR}R</span>` : ""}
+    </div>`;
 
-    const discClass =
-      trade.discipline_label === "Trade disciplinado" ? "badge-bullish" :
-      trade.discipline_label === "Error de disciplina" ? "badge-bearish" :
-      "badge-none";
-    const labelParts = [];
-    if (trade.discipline_label) {
-      labelParts.push(`<span class="badge-direction ${discClass}">${escapeHtml(trade.discipline_label)}</span>`);
-    }
-    if (trade.emotional_label) {
-      labelParts.push(`<span class="badge-direction badge-bearish">${escapeHtml(trade.emotional_label)}</span>`);
-    }
-    if (trade.exit_label) {
-      labelParts.push(`<span class="badge-direction badge-bearish">${escapeHtml(trade.exit_label)}</span>`);
-    }
-    const labelsHtml = labelParts.length
-      ? `<div class="bias-badges" style="flex-wrap:wrap;gap:6px;margin-bottom:10px;">${labelParts.join("")}</div>`
-      : "";
-
-    const gradeClass = { "A+": "grade-a-plus", "A": "grade-a", "B": "grade-b", "C": "grade-c", "F": "grade-f" }[trade.trade_grade] || "grade-f";
-    const techCls  = (trade.technical_error_label  || "").startsWith("Error")      ? "analysis-error" :
-                     (trade.technical_error_label  || "").startsWith("Advertencia") ? "analysis-warn"  : "analysis-ok";
-    const psycCls  = (trade.psychology_error_label || "").startsWith("Error")      ? "analysis-error" : "analysis-ok";
-    const analysisHtml = trade.trade_grade ? `
-      <div class="trade-analysis">
-        <span class="trade-grade ${gradeClass}">${escapeHtml(trade.trade_grade)}</span>
-        <span class="analysis-chip ${techCls}">${escapeHtml(trade.technical_error_label || "")}</span>
-        <span class="analysis-chip ${psycCls}">${escapeHtml(trade.psychology_error_label || "")}</span>
-        <span class="analysis-chip analysis-quality">${escapeHtml(trade.execution_quality_label || "")}</span>
-      </div>` : "";
-
-    const emotionLabels = {
-      calmado: "Calmado", ansioso: "Ansioso", fomo: "FOMO",
-      frustrado: "Frustrado", neutral: "Neutral",
-    };
-    const exitLabels = {
-      por_plan: "Por plan", por_miedo: "Por miedo",
-      por_impulso: "Por impulso", manual: "Manual", otro: "Otro",
-    };
-    const psychoParts = [];
-    if (trade.followed_rules !== null && trade.followed_rules !== undefined) {
-      psychoParts.push(`<span class="bias-flag ${trade.followed_rules ? "bias-flag-on" : "bias-flag-off"}">${trade.followed_rules ? "Siguio reglas" : "No siguio reglas"}</span>`);
-    }
-    if (trade.emotional_state) {
-      psychoParts.push(`<span class="bias-dir-chip">Estado: <span>${emotionLabels[trade.emotional_state] || trade.emotional_state}</span></span>`);
-    }
-    if (trade.exit_reason) {
-      psychoParts.push(`<span class="bias-dir-chip">Salida: <span>${exitLabels[trade.exit_reason] || trade.exit_reason}</span></span>`);
-    }
-    const psychoHtml = psychoParts.length
-      ? `<div class="bias-directions">${psychoParts.join("")}</div>`
-      : "";
-
-    return `
-      <div class="trade-item">
-        <div class="bias-header">
-          <span class="bias-day-label">${escapeHtml(dayLabel)}</span>
-          <div class="bias-badges">${dirBadge}</div>
+    return `<div class="day-group">
+      <div class="day-group-header">
+        <div class="day-group-title">
+          <span class="day-group-date">${escapeHtml(dateStr)}</span>
+          <span class="day-group-market">${escapeHtml(market)}</span>
         </div>
-        ${labelsHtml}
-        ${analysisHtml}
-
-        <div class="bias-levels">
-          <div class="bias-level-item">
-            <span class="bias-level-label">Entrada</span>
-            <span class="bias-level-value">${trade.entry_price}</span>
-          </div>
-          <div class="bias-level-item">
-            <span class="bias-level-label">Stop Loss</span>
-            <span class="bias-level-value">${trade.stop_loss}</span>
-          </div>
-          <div class="bias-level-item">
-            <span class="bias-level-label">Take Profit</span>
-            <span class="bias-level-value">${trade.take_profit}</span>
-          </div>
-          <div class="bias-level-item">
-            <span class="bias-level-label">Resultado</span>
-            ${resultHtml}
-          </div>
-        </div>
-
-        <div class="bias-flags">
-          <span class="bias-flag ${trade.sweep_confirmed  ? "bias-flag-on" : "bias-flag-off"}">Barrida</span>
-          <span class="bias-flag ${trade.pda_confirmed    ? "bias-flag-on" : "bias-flag-off"}">PDA HTF</span>
-          <span class="bias-flag ${trade.ifvg_confirmed   ? "bias-flag-on" : "bias-flag-off"}">IFVG</span>
-          <span class="bias-flag ${trade.vshape_confirmed ? "bias-flag-on" : "bias-flag-off"}">Reversión</span>
-          <span class="bias-flag ${trade.smt_confirmed    ? "bias-flag-on" : "bias-flag-off"}">SMT</span>
-          <span class="bias-flag ${trade.clean_reaction   ? "bias-flag-on" : "bias-flag-off"}">Rx limpia</span>
-          <span class="bias-flag ${trade.ny_killzone      ? "bias-flag-on" : "bias-flag-off"}">KZ NY</span>
-          <span class="bias-flag ${trade.setup_valid      ? "bias-flag-on" : "bias-flag-off"}">${trade.setup_valid ? "Setup válido" : "Setup inválido"}</span>
-        </div>
-        ${trade.liquidity_type ? `<div class="bias-directions" style="margin-bottom:8px;"><span class="bias-dir-chip">Liquidez: <span>${escapeHtml(trade.liquidity_type.toUpperCase())}</span></span></div>` : ""}
-
-        ${psychoHtml}
-        ${imagesHtml}
-        ${notesHtml}
-        <p class="bias-created">Registrado: ${formatDateTime(trade.created_at)}</p>
+        ${daySummary}
       </div>
-    `;
+      <div class="day-group-trades">${dayTrades.map(t => renderTradeCard(t)).join("")}</div>
+    </div>`;
   }).join("");
+}
+
+function renderTradeCard(trade) {
+  // Border highlight class
+  const hasTechError  = (trade.technical_error_label  || "").startsWith("Error");
+  const hasPsychError = (trade.psychology_error_label || "").startsWith("Error") || !!trade.emotional_label;
+  const highlightCls  = trade.trade_grade === "A+" ? "highlight-aplus"
+    : hasTechError  ? "highlight-error"
+    : hasPsychError ? "highlight-psychology"
+    : "";
+
+  // Result background class
+  const resultBgCls = trade.result_r != null
+    ? (trade.result_r > 0 ? "trade-positive" : trade.result_r < 0 ? "trade-negative" : "trade-be")
+    : "";
+
+  const dirBadge = trade.direction === "long"
+    ? `<span class="badge-long">Long</span>`
+    : `<span class="badge-short">Short</span>`;
+
+  let resultHtml = "";
+  if (trade.result_r != null) {
+    const cls = trade.result_r > 0 ? "result-positive" : trade.result_r < 0 ? "result-negative" : "result-neutral";
+    resultHtml = `<span class="bias-level-value ${cls}">${trade.result_r > 0 ? "+" : ""}${trade.result_r}R</span>`;
+  } else {
+    resultHtml = `<span class="bias-level-value result-neutral">—</span>`;
+  }
+
+  const notesHtml  = trade.notes ? `<p class="bias-text">${escapeHtml(trade.notes)}</p>` : "";
+  const typeLabels = { entrada: "Entrada", salida: "Salida", contexto: "Contexto" };
+  const tradeImages = tradeImagesCache.filter(img => img.trade_id === trade.id);
+  const imagesHtml  = tradeImages.length
+    ? `<div class="trade-images">${tradeImages.map(img =>
+        `<a href="${escapeHtml(img.image_url)}" target="_blank" rel="noopener" class="trade-image-link">${typeLabels[img.image_type] || img.image_type}: Ver imagen</a>`
+      ).join("")}</div>`
+    : "";
+
+  const discClass = trade.discipline_label === "Trade disciplinado" ? "badge-bullish"
+    : trade.discipline_label === "Error de disciplina" ? "badge-bearish" : "badge-none";
+  const labelParts = [];
+  if (trade.discipline_label) labelParts.push(`<span class="badge-direction ${discClass}">${escapeHtml(trade.discipline_label)}</span>`);
+  if (trade.emotional_label)  labelParts.push(`<span class="badge-direction badge-bearish">${escapeHtml(trade.emotional_label)}</span>`);
+  if (trade.exit_label)       labelParts.push(`<span class="badge-direction badge-bearish">${escapeHtml(trade.exit_label)}</span>`);
+  const labelsHtml = labelParts.length
+    ? `<div class="bias-badges" style="flex-wrap:wrap;gap:6px;margin-bottom:10px;">${labelParts.join("")}</div>`
+    : "";
+
+  const gradeClass   = { "A+": "grade-a-plus", "A": "grade-a", "B": "grade-b", "C": "grade-c", "F": "grade-f" }[trade.trade_grade] || "grade-f";
+  const techCls      = hasTechError ? "analysis-error" : (trade.technical_error_label || "").startsWith("Advertencia") ? "analysis-warn" : "analysis-ok";
+  const psycCls      = (trade.psychology_error_label || "").startsWith("Error") ? "analysis-error" : "analysis-ok";
+  const analysisHtml = trade.trade_grade ? `
+    <div class="trade-analysis">
+      <span class="trade-grade ${gradeClass}">${escapeHtml(trade.trade_grade)}</span>
+      <span class="analysis-chip ${techCls}">${escapeHtml(trade.technical_error_label || "")}</span>
+      <span class="analysis-chip ${psycCls}">${escapeHtml(trade.psychology_error_label || "")}</span>
+      <span class="analysis-chip analysis-quality">${escapeHtml(trade.execution_quality_label || "")}</span>
+    </div>` : "";
+
+  const emotionLabels = { calmado: "Calmado", ansioso: "Ansioso", fomo: "FOMO", frustrado: "Frustrado", neutral: "Neutral" };
+  const exitLabels    = { por_plan: "Por plan", por_miedo: "Por miedo", por_impulso: "Por impulso", manual: "Manual", otro: "Otro" };
+  const psychoParts   = [];
+  if (trade.followed_rules != null) {
+    psychoParts.push(`<span class="bias-flag ${trade.followed_rules ? "bias-flag-on" : "bias-flag-off"}">${trade.followed_rules ? "Siguió reglas" : "No siguió reglas"}</span>`);
+  }
+  if (trade.emotional_state) psychoParts.push(`<span class="bias-dir-chip">Estado: <span>${emotionLabels[trade.emotional_state] || trade.emotional_state}</span></span>`);
+  if (trade.exit_reason)     psychoParts.push(`<span class="bias-dir-chip">Salida: <span>${exitLabels[trade.exit_reason] || trade.exit_reason}</span></span>`);
+  const psychoHtml = psychoParts.length ? `<div class="bias-directions">${psychoParts.join("")}</div>` : "";
+
+  return `
+    <div class="trade-item ${resultBgCls} ${highlightCls}">
+      <div class="bias-header">
+        <div class="bias-badges">${dirBadge}</div>
+        ${trade.liquidity_type ? `<span class="bias-dir-chip" style="font-size:0.72rem;">Liq: <span>${escapeHtml(trade.liquidity_type.toUpperCase())}</span></span>` : ""}
+      </div>
+      ${labelsHtml}
+      ${analysisHtml}
+      <div class="bias-levels">
+        <div class="bias-level-item">
+          <span class="bias-level-label">Entrada</span>
+          <span class="bias-level-value">${trade.entry_price}</span>
+        </div>
+        <div class="bias-level-item">
+          <span class="bias-level-label">Stop Loss</span>
+          <span class="bias-level-value">${trade.stop_loss}</span>
+        </div>
+        <div class="bias-level-item">
+          <span class="bias-level-label">Take Profit</span>
+          <span class="bias-level-value">${trade.take_profit}</span>
+        </div>
+        <div class="bias-level-item">
+          <span class="bias-level-label">Resultado</span>
+          ${resultHtml}
+        </div>
+      </div>
+      <div class="bias-flags">
+        <span class="bias-flag ${trade.sweep_confirmed  ? "bias-flag-on" : "bias-flag-off"}">Barrida</span>
+        <span class="bias-flag ${trade.pda_confirmed    ? "bias-flag-on" : "bias-flag-off"}">PDA HTF</span>
+        <span class="bias-flag ${trade.ifvg_confirmed   ? "bias-flag-on" : "bias-flag-off"}">IFVG</span>
+        <span class="bias-flag ${trade.vshape_confirmed ? "bias-flag-on" : "bias-flag-off"}">Reversión</span>
+        <span class="bias-flag ${trade.smt_confirmed    ? "bias-flag-on" : "bias-flag-off"}">SMT</span>
+        <span class="bias-flag ${trade.clean_reaction   ? "bias-flag-on" : "bias-flag-off"}">Rx limpia</span>
+        <span class="bias-flag ${trade.ny_killzone      ? "bias-flag-on" : "bias-flag-off"}">KZ NY</span>
+        <span class="bias-flag ${trade.setup_valid      ? "bias-flag-on" : "bias-flag-off"}">${trade.setup_valid ? "Setup válido" : "Setup inválido"}</span>
+      </div>
+      ${psychoHtml}
+      ${imagesHtml}
+      ${notesHtml}
+      <p class="bias-created">Registrado: ${formatDateTime(trade.created_at)}</p>
+    </div>`;
 }
 
 // ─── Utilidades ───────────────────────────────────────────────────────────────

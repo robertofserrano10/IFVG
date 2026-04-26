@@ -787,3 +787,138 @@ button:disabled {
   margin-top: 10px;
   text-align: right;
 }
+
+/* ─── Phase 19: Search ─────────────────────────── */
+
+.search-wrapper {
+  margin-bottom: 10px;
+}
+
+#trade_search {
+  width: 100%;
+  background-color: #0f1117;
+  border: 1px solid #2d3148;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+#trade_search:focus {
+  border-color: #3b82f6;
+}
+
+/* ─── Phase 19: Trade result colors ───────────── */
+
+.trade-positive {
+  border-left: 3px solid #16a34a;
+  background-color: #0b1f12;
+}
+
+.trade-negative {
+  border-left: 3px solid #dc2626;
+  background-color: #1a0808;
+}
+
+.trade-be {
+  border-left: 3px solid #d97706;
+  background-color: #1a1400;
+}
+
+/* ─── Phase 19: Error highlights ──────────────── */
+
+.highlight-aplus {
+  border: 2px solid #16a34a;
+  box-shadow: 0 0 0 1px #16a34a22;
+}
+
+.highlight-error {
+  border: 2px solid #dc2626;
+  box-shadow: 0 0 0 1px #dc262622;
+}
+
+.highlight-psychology {
+  border: 2px solid #ea580c;
+  box-shadow: 0 0 0 1px #ea580c22;
+}
+
+/* ─── Phase 19: Day groups ─────────────────────── */
+
+.day-group {
+  margin-bottom: 20px;
+}
+
+.day-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #161824;
+  border: 1px solid #2d3148;
+  border-radius: 8px 8px 0 0;
+  padding: 10px 14px;
+}
+
+.day-group-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.day-group-date {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.day-group-market {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: #1e3a5f;
+  color: #93c5fd;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.day-summary {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.day-summary-item {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.day-summary-item span {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.day-group-trades {
+  border: 1px solid #2d3148;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+}
+
+.day-group-trades .trade-item {
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid #2d3148;
+}
+
+.day-group-trades .trade-item:last-child {
+  border-bottom: none;
+}
+
+/* ─── Phase 19: Text color utilities ──────────── */
+
+.positive { color: #4ade80; }
+.negative { color: #f87171; }
