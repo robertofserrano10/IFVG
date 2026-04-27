@@ -851,9 +851,10 @@ function formatDateTime(isoString) {
 // ─── PDF Reports ─────────────────────────────────────────────────────────────
 
 async function downloadMonthlyPDF() {
-  const yearVal  = parseInt(document.getElementById("pdf_year").value);
-  const monthVal = parseInt(document.getElementById("pdf_month").value);
-  const msg      = document.getElementById("pdfMsg");
+  const yearVal     = parseInt(document.getElementById("pdf_year").value);
+  const monthVal    = parseInt(document.getElementById("pdf_month").value);
+  const includeImgs = document.getElementById("include_pdf_images")?.checked ?? false;
+  const msg         = document.getElementById("pdfMsg");
   if (!yearVal || !monthVal) {
     msg.textContent = "Selecciona año y mes.";
     msg.className = "result error";
@@ -867,7 +868,8 @@ async function downloadMonthlyPDF() {
   try {
     msg.textContent = "Generando PDF...";
     msg.className = "result";
-    const url = `${BACKEND_URL}/reports/monthly/pdf?year=${yearVal}&month=${monthVal}`;
+    let url = `${BACKEND_URL}/reports/monthly/pdf?year=${yearVal}&month=${monthVal}`;
+    if (includeImgs) url += "&include_images=true";
     window.open(url, "_blank");
     msg.textContent = "PDF generado.";
     msg.className = "result success";

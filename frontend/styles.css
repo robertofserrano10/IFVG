@@ -1077,3 +1077,145 @@ button:disabled {
 
 .positive { color: #4ade80; }
 .negative { color: #f87171; }
+
+/* ─── Phase 23: Section subtitle ──────────────── */
+
+.section-subtitle {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-top: 3px;
+  font-weight: 400;
+}
+
+/* ─── Phase 23: active-nav (alias for nav-item.active) */
+
+.active-nav,
+.nav-item.active {
+  background-color: #1e3a5f;
+  color: #60a5fa;
+  border-left: 3px solid #3b82f6;
+  font-weight: 600;
+}
+
+/* ─── Phase 23: strategy-card ──────────────────── */
+
+.strategy-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.strategy-card {
+  padding: 14px 16px;
+  background-color: #0f1117;
+  border: 1px solid #2d3148;
+  border-radius: 10px;
+  transition: border-color 0.15s ease;
+}
+
+.strategy-card:hover {
+  border-color: #3b82f6;
+}
+
+.strategy-card .strategy-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #3b82f6;
+  margin-bottom: 6px;
+}
+
+.strategy-card .strategy-value {
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ─── Phase 23: report-card ────────────────────── */
+
+.report-card {
+  background-color: #1e2130;
+  border: 1px solid #2d3148;
+  border-radius: 12px;
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+/* ─── Phase 23: responsive ─────────────────────── */
+
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: none;
+    border-bottom: 1px solid #2d3148;
+  }
+
+  .sidebar-brand {
+    padding: 12px 16px;
+    border-bottom: none;
+    border-right: 1px solid #2d3148;
+    flex-shrink: 0;
+  }
+
+  .nav-menu {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .nav-item {
+    padding: 14px 16px;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    flex-shrink: 0;
+  }
+
+  .nav-item.active,
+  .active-nav {
+    border-left: none;
+    border-bottom: 3px solid #3b82f6;
+    background-color: #1e3a5f;
+  }
+
+  .main-content {
+    padding: 20px 16px;
+  }
+
+  .section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grade-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .strategy-card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+.responsive {
+  box-sizing: border-box;
+}

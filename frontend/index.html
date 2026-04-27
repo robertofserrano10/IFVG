@@ -32,7 +32,10 @@
           <!-- ══ DASHBOARD ══════════════════════════════════════════════ -->
           <section class="app-section active" id="section-dashboard">
             <div class="section-header">
-              <h2 class="section-title">Dashboard</h2>
+              <div>
+                <h2 class="section-title">Dashboard</h2>
+                <p class="section-subtitle">Resumen de rendimiento y disciplina</p>
+              </div>
               <button id="testBtn" onclick="testConnection()" class="btn-sm">Test Backend</button>
             </div>
             <div id="result" class="result hidden"></div>
@@ -48,7 +51,10 @@
           <!-- ══ TRADING DAY ════════════════════════════════════════════ -->
           <section class="app-section" id="section-trading-day">
             <div class="section-header">
-              <h2 class="section-title">Trading Day</h2>
+              <div>
+                <h2 class="section-title">Trading Day</h2>
+                <p class="section-subtitle">Registra condiciones de mercado y bias diario</p>
+              </div>
             </div>
 
             <div class="section-grid">
@@ -241,7 +247,10 @@
           <!-- ══ NUEVO TRADE ════════════════════════════════════════════ -->
           <section class="app-section" id="section-nuevo-trade">
             <div class="section-header">
-              <h2 class="section-title">Nuevo Trade</h2>
+              <div>
+                <h2 class="section-title">Nuevo Trade</h2>
+                <p class="section-subtitle">Registra una ejecución completa</p>
+              </div>
             </div>
 
             <div class="card">
@@ -384,7 +393,10 @@
           <!-- ══ JOURNAL ════════════════════════════════════════════════ -->
           <section class="app-section" id="section-journal">
             <div class="section-header">
-              <h2 class="section-title">Journal</h2>
+              <div>
+                <h2 class="section-title">Journal</h2>
+                <p class="section-subtitle">Revisa, filtra y analiza tus trades</p>
+              </div>
             </div>
 
             <div class="card">
@@ -472,7 +484,10 @@
           <!-- ══ REPORTES ═══════════════════════════════════════════════ -->
           <section class="app-section" id="section-reportes">
             <div class="section-header">
-              <h2 class="section-title">Reportes</h2>
+              <div>
+                <h2 class="section-title">Reportes</h2>
+                <p class="section-subtitle">Genera reportes PDF mensuales de tu operativa</p>
+              </div>
             </div>
 
             <div class="card">
@@ -500,6 +515,9 @@
                   </select>
                 </div>
               </div>
+              <div class="form-group checkbox-group" style="margin-bottom:16px;">
+                <label><input type="checkbox" id="include_pdf_images" /> Incluir screenshots en PDF</label>
+              </div>
               <button onclick="downloadMonthlyPDF()">Descargar PDF</button>
               <div id="pdfMsg" class="result hidden"></div>
             </div>
@@ -508,27 +526,36 @@
           <!-- ══ ESTRATEGIA ═════════════════════════════════════════════ -->
           <section class="app-section" id="section-estrategia">
             <div class="section-header">
-              <h2 class="section-title">Estrategia</h2>
+              <div>
+                <h2 class="section-title">Estrategia</h2>
+                <p class="section-subtitle">Sistema de trading FVG — reglas y criterios de calidad</p>
+              </div>
             </div>
 
             <div class="card">
               <h3 class="card-title">Reglas del Sistema</h3>
 
-              <div class="strategy-block">
-                <p class="strategy-label">Secuencia base</p>
-                <p class="strategy-value">Sweep + PDA + V-Shape + IFVG</p>
-              </div>
-              <div class="strategy-block">
-                <p class="strategy-label">Obligatorio</p>
-                <p class="strategy-value">PDA HTF confirmada</p>
-              </div>
-              <div class="strategy-block">
-                <p class="strategy-label">Opcional</p>
-                <p class="strategy-value">SMT</p>
-              </div>
-              <div class="strategy-block">
-                <p class="strategy-label">Calidad de ejecución</p>
-                <p class="strategy-value">Clean Reaction + NY Killzone</p>
+              <div class="strategy-card-grid">
+                <div class="strategy-card">
+                  <p class="strategy-label">Bias</p>
+                  <p class="strategy-value">Price zone + Liquidez pendiente + Sweep + Reacción</p>
+                </div>
+                <div class="strategy-card">
+                  <p class="strategy-label">Setup Core</p>
+                  <p class="strategy-value">Sweep + PDA HTF + V-Shape + iFVG</p>
+                </div>
+                <div class="strategy-card">
+                  <p class="strategy-label">Confirmaciones</p>
+                  <p class="strategy-value">PDA HTF (obligatorio) · SMT (opcional)</p>
+                </div>
+                <div class="strategy-card">
+                  <p class="strategy-label">Gestión</p>
+                  <p class="strategy-value">Clean Reaction + NY Killzone</p>
+                </div>
+                <div class="strategy-card">
+                  <p class="strategy-label">Psicología</p>
+                  <p class="strategy-value">Seguir reglas · Estado emocional controlado</p>
+                </div>
               </div>
 
               <div class="strategy-grades">
