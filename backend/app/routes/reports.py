@@ -1,15 +1,24 @@
 import re
 from collections import defaultdict
+from io import BytesIO
 
+import requests as _http
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 from fpdf import FPDF
+
+try:
+    from PIL import Image as _PilImage
+    _PIL_OK = True
+except ImportError:
+    _PIL_OK = False
 
 from app.database import get_supabase_client
 
 
 def _safe_err(e: Exception) -> str:
     return re.sub(r'eyJ[A-Za-z0-9\-_]{10,}', '[REDACTED]', str(e))
+
 
 router = APIRouter()
 
@@ -18,6 +27,11 @@ _MONTH_ES = {
     5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto",
     9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre",
 }
+
+_IMG_PRIORITY = {"entrada": 0, "contexto": 1, "salida": 2}
+_MAX_IMG_WIDTH_PX = 800
+_MAX_IMG_PDF_MM   = 140
+_MAX_IMAGES_PDF   = 22
 
 
 def _winrate(rl):
@@ -47,6 +61,25 @@ def _grade(t):
     return "F"
 
 
+def _process_image(url: str) -> "BytesIO | None":
+    """Download url, resize to max 800px width, return JPEG BytesIO. None on any failure."""
+    if not _PIL_OK:
+        return None
+    try:
+        resp = _http.get(url, timeout=3)
+        resp.raise_for_status()
+        img = _PilImage.open(BytesIO(resp.content)).convert("RGB")
+        if img.width > _MAX_IMG_WIDTH_PX:
+            new_h = int(img.height * _MAX_IMG_WIDTH_PX / img.width)
+            img = img.resize((_MAX_IMG_WIDTH_PX, new_h), _PilImage.LANCZOS)
+        buf = BytesIO()
+        img.save(buf, format="JPEG", quality=75)
+        buf.seek(0)
+        return buf
+    except Exception:
+        return None
+
+
 class _PDF(FPDF):
     def section(self, title):
         self.ln(3)
@@ -74,9 +107,22 @@ class _PDF(FPDF):
         self.multi_cell(self.epw - 6, 5, str(text)[:100],
                         new_x="LMARGIN", new_y="NEXT")
 
+    def trade_block(self, header: str, sub: str):
+        self.set_x(self.l_margin)
+        self.set_font("Helvetica", "B", 8)
+        self.set_fill_color(55, 55, 55)
+        self.set_text_color(255, 255, 255)
+        self.cell(self.epw, 5, f"  {header}", border=0, fill=True,
+                  new_x="LMARGIN", new_y="NEXT")
+        self.set_text_color(0, 0, 0)
+        if sub:
+            self.set_x(self.l_margin)
+            self.set_font("Helvetica", "", 8)
+            self.cell(self.epw, 4, f"  {sub}", new_x="LMARGIN", new_y="NEXT")
+
 
 @router.get("/reports/monthly/pdf")
-def get_monthly_pdf(year: int, month: int):
+def get_monthly_pdf(year: int, month: int, include_images: bool = False):
     if not (2000 <= year <= 2100):
         raise HTTPException(status_code=400, detail="Año inválido. Debe estar entre 2000 y 2100.")
     if not (1 <= month <= 12):
@@ -167,6 +213,31 @@ def get_monthly_pdf(year: int, month: int):
         if disc_ratio < 0.5:      alerts.append("Baja disciplina detectada")
         if not alerts:            alerts.append("Disciplina estable")
 
+        # ── sort trades newest-first ───────────────────────────────────────────
+        trades = sorted(
+            trades,
+            key=lambda t: day_map.get(t.get("trading_day_id"), {}).get("trade_date", ""),
+            reverse=True,
+        )
+
+        # ── images lookup (optional) ───────────────────────────────────────────
+        best_image_url: dict = {}
+        if include_images and trades:
+            trade_ids = [t["id"] for t in trades]
+            img_rows = (
+                client.table("trade_images")
+                .select("*")
+                .in_("trade_id", trade_ids)
+                .execute()
+                .data or []
+            )
+            by_trade: dict = defaultdict(list)
+            for row in img_rows:
+                by_trade[int(row["trade_id"])].append(row)
+            for tid, imgs in by_trade.items():
+                best = min(imgs, key=lambda x: _IMG_PRIORITY.get(x.get("image_type", ""), 3))
+                best_image_url[tid] = best["image_url"]
+
         # ── build PDF ──────────────────────────────────────────────────────────
         pdf = _PDF()
         pdf.set_auto_page_break(auto=True, margin=15)
@@ -223,11 +294,41 @@ def get_monthly_pdf(year: int, month: int):
         for a in alerts:
             pdf.bullet(a)
 
+        # ── trades section ─────────────────────────────────────────────────────
         pdf.section("TRADES DEL MES")
+
         if not trades:
             pdf.set_font("Helvetica", "I", 9)
             pdf.cell(pdf.epw, 5, "No hay trades registrados para este periodo.",
                      new_x="LMARGIN", new_y="NEXT")
+
+        elif include_images:
+            img_embedded = 0
+            for t in trades[:30]:
+                d       = day_map.get(t.get("trading_day_id"), {})
+                fecha   = str(d.get("trade_date", ""))[:10]
+                mercado = str(d.get("market", ""))[:8]
+                direc   = str(t.get("direction", ""))[:5].upper()
+                liq     = str(t.get("liquidity_type") or "")[:15]
+                valid_l = "Valido" if t.get("setup_valid") else "Invalido"
+                r_raw   = t.get("result_r")
+                r_val   = (f"+{r_raw}R" if r_raw > 0 else f"{r_raw}R") if r_raw is not None else "-"
+                grade   = _grade(t)
+
+                header = f"{fecha}  {mercado}  {direc}  {valid_l}  {r_val}  [{grade}]"
+                sub    = f"Liquidez: {liq}" if liq else ""
+                pdf.trade_block(header, sub)
+
+                tid = t.get("id")
+                if img_embedded < _MAX_IMAGES_PDF and tid in best_image_url:
+                    buf = _process_image(best_image_url[tid])
+                    if buf is not None:
+                        pdf.set_x(pdf.l_margin)
+                        pdf.image(buf, w=_MAX_IMG_PDF_MM)
+                        img_embedded += 1
+
+                pdf.ln(2)
+
         else:
             cols = [("Fecha", 30), ("Mercado", 20), ("Dir", 16),
                     ("Liquidez", 26), ("Valid", 14), ("R", 20), ("Grade", 14)]

@@ -37,7 +37,9 @@
       "Bash(git rm *)",
       "Bash(taskkill *)",
       "Bash(backend/.venv/Scripts/python *)",
-      "Bash(.venv/Scripts/uvicorn app.main:app --port 8000 --timeout-keep-alive 2)"
+      "Bash(.venv/Scripts/uvicorn app.main:app --port 8000 --timeout-keep-alive 2)",
+      "Bash(.venv/Scripts/uvicorn app.main:app --port 8000)",
+      "Bash(.venv/Scripts/python -c ' *)"
     ]
   },
   "disabledMcpjsonServers": [
