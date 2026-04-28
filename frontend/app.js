@@ -1,7 +1,5 @@
-// URL base del backend. Si cambias el puerto en .env, actualiza esto también.
 const BACKEND_URL = "http://127.0.0.1:8000";
 
-// Caches usados por los dropdowns y por la lista de trades
 let tradingDaysCache = [];
 let dailyBiasCache   = [];
 let tradesCache      = [];
@@ -14,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadTrades();
 });
 
-// ─── Navegación por secciones ─────────────────────────────────────────────────
+// ─── Navigation ───────────────────────────────────────────────────────────────
 
 function showSection(sectionId) {
   document.querySelectorAll(".app-section").forEach(s => s.classList.remove("active"));
@@ -33,10 +31,10 @@ async function loadMetrics() {
   const el = document.getElementById("metricsSummary");
   try {
     const r = await fetch(`${BACKEND_URL}/metrics`);
-    if (!r.ok) throw new Error(`Estado: ${r.status}`);
+    if (!r.ok) throw new Error(`Status: ${r.status}`);
     renderMetrics(await r.json());
   } catch (err) {
-    el.innerHTML = `<p class="empty-state" style="color:#f87171;">Error al cargar: ${err.message}</p>`;
+    el.innerHTML = `<p class="empty-state" style="color:#f87171;">Error loading: ${err.message}</p>`;
   }
 }
 
@@ -60,39 +58,45 @@ function renderMetrics(m) {
       ${mkGrid(cards)}
     </div>`;
 
-  const general = [
-    { label: "Total de trades",          value: fmt(m.total_trades),              cls: "" },
-    { label: "Setups válidos",           value: fmt(m.valid_setups),              cls: m.valid_setups > 0 ? "metric-value-positive" : "" },
-    { label: "Setups inválidos",         value: fmt(m.invalid_setups),            cls: warnCls(m.invalid_setups) },
-    { label: "Trades disciplinados",     value: fmt(m.disciplined_trades),        cls: m.disciplined_trades > 0 ? "metric-value-positive" : "" },
-    { label: "Errores de disciplina",    value: fmt(m.discipline_errors),         cls: warnCls(m.discipline_errors) },
-    { label: "Promedio R",               value: fmt(m.avg_result_r),              cls: rCls(m.avg_result_r) },
-    { label: "Promedio R válidos",       value: fmt(m.avg_result_r_valid_setups), cls: rCls(m.avg_result_r_valid_setups) },
-    { label: "Winrate general",          value: fmt(m.winrate_overall, "%"),      cls: "" },
-    { label: "Winrate válidos",          value: fmt(m.winrate_valid_setups, "%"), cls: "" },
+  const summary = [
+    { label: "Total Trades",    value: fmt(m.total_trades),   cls: "" },
+    { label: "Valid Setups",    value: fmt(m.valid_setups),   cls: m.valid_setups > 0 ? "metric-value-positive" : "" },
+    { label: "Invalid Setups",  value: fmt(m.invalid_setups), cls: warnCls(m.invalid_setups) },
+  ];
+
+  const performance = [
+    { label: "Avg R",           value: fmt(m.avg_result_r),              cls: rCls(m.avg_result_r) },
+    { label: "Avg R (Valid)",   value: fmt(m.avg_result_r_valid_setups), cls: rCls(m.avg_result_r_valid_setups) },
+    { label: "Win Rate",        value: fmt(m.winrate_overall, "%"),      cls: "" },
+    { label: "Win Rate (Valid)",value: fmt(m.winrate_valid_setups, "%"), cls: "" },
+  ];
+
+  const discipline = [
+    { label: "Disciplined Trades",  value: fmt(m.disciplined_trades),  cls: m.disciplined_trades > 0 ? "metric-value-positive" : "" },
+    { label: "Discipline Errors",   value: fmt(m.discipline_errors),   cls: warnCls(m.discipline_errors) },
   ];
 
   const tech = [
-    { label: "Sin sweep",          value: fmt(m.trades_without_sweep),       cls: warnCls(m.trades_without_sweep) },
-    { label: "Sin PDA HTF",        value: fmt(m.trades_without_pda),         cls: warnCls(m.trades_without_pda) },
-    { label: "Sin IFVG",           value: fmt(m.trades_without_ifvg),        cls: warnCls(m.trades_without_ifvg) },
-    { label: "Sin V-Shape",        value: fmt(m.trades_without_vshape),      cls: warnCls(m.trades_without_vshape) },
-    { label: "Reacción no limpia", value: fmt(m.trades_unclean_reaction),    cls: warnCls(m.trades_unclean_reaction) },
-    { label: "Fuera de KZ NY",     value: fmt(m.trades_outside_ny_killzone), cls: warnCls(m.trades_outside_ny_killzone) },
+    { label: "No Sweep",         value: fmt(m.trades_without_sweep),       cls: warnCls(m.trades_without_sweep) },
+    { label: "No PDA HTF",       value: fmt(m.trades_without_pda),         cls: warnCls(m.trades_without_pda) },
+    { label: "No IFVG",          value: fmt(m.trades_without_ifvg),        cls: warnCls(m.trades_without_ifvg) },
+    { label: "No V-Shape",       value: fmt(m.trades_without_vshape),      cls: warnCls(m.trades_without_vshape) },
+    { label: "Unclean Reaction", value: fmt(m.trades_unclean_reaction),    cls: warnCls(m.trades_unclean_reaction) },
+    { label: "Outside NY KZ",    value: fmt(m.trades_outside_ny_killzone), cls: warnCls(m.trades_outside_ny_killzone) },
   ];
 
   const psych = [
-    { label: "FOMO",               value: fmt(m.fomo_trades),        cls: warnCls(m.fomo_trades) },
-    { label: "Ansiedad",           value: fmt(m.anxiety_trades),     cls: warnCls(m.anxiety_trades) },
-    { label: "Frustración",        value: fmt(m.frustration_trades), cls: warnCls(m.frustration_trades) },
-    { label: "Rompió reglas",      value: fmt(m.rule_break_trades),  cls: warnCls(m.rule_break_trades) },
-    { label: "Salida por miedo",   value: fmt(m.fear_exits),         cls: warnCls(m.fear_exits) },
-    { label: "Salida por impulso", value: fmt(m.impulse_exits),      cls: warnCls(m.impulse_exits) },
+    { label: "FOMO",          value: fmt(m.fomo_trades),        cls: warnCls(m.fomo_trades) },
+    { label: "Anxiety",       value: fmt(m.anxiety_trades),     cls: warnCls(m.anxiety_trades) },
+    { label: "Frustration",   value: fmt(m.frustration_trades), cls: warnCls(m.frustration_trades) },
+    { label: "Rule Breaks",   value: fmt(m.rule_break_trades),  cls: warnCls(m.rule_break_trades) },
+    { label: "Fear Exits",    value: fmt(m.fear_exits),         cls: warnCls(m.fear_exits) },
+    { label: "Impulse Exits", value: fmt(m.impulse_exits),      cls: warnCls(m.impulse_exits) },
   ];
 
   const gradesHtml = `
     <div class="metrics-section">
-      <p class="metrics-section-title">Calidad de ejecución</p>
+      <p class="metrics-section-title">Execution Quality</p>
       <div class="grade-grid">
         <div class="grade-metric-card grade-a-plus"><span class="grade-metric-label">A+</span><span class="grade-metric-value">${fmt(m.grade_a_plus_trades)}</span></div>
         <div class="grade-metric-card grade-a">     <span class="grade-metric-label">A</span> <span class="grade-metric-value">${fmt(m.grade_a_trades)}</span></div>
@@ -103,34 +107,36 @@ function renderMetrics(m) {
     </div>`;
 
   el.innerHTML =
-    mkSection("Resumen general", general) +
-    mkSection("Errores técnicos", tech) +
-    mkSection("Errores psicológicos", psych) +
+    mkSection("Journal Summary", summary) +
+    mkSection("Performance Insights", performance) +
+    mkSection("Discipline Alerts", discipline) +
+    mkSection("Technical Errors", tech) +
+    mkSection("Psychological Errors", psych) +
     gradesHtml;
 }
 
-// ─── Test de conexión ────────────────────────────────────────────────────────
+// ─── Backend test ─────────────────────────────────────────────────────────────
 
 async function testConnection() {
   const btn = document.getElementById("testBtn");
   const resultBox = document.getElementById("result");
 
   btn.disabled = true;
-  btn.textContent = "Conectando...";
+  btn.textContent = "Connecting...";
   resultBox.className = "result hidden";
   resultBox.textContent = "";
 
   try {
     const response = await fetch(`${BACKEND_URL}/health`);
-    if (!response.ok) throw new Error(`El servidor respondió con estado: ${response.status}`);
+    if (!response.ok) throw new Error(`Server responded with status: ${response.status}`);
     const data = await response.json();
     resultBox.textContent = JSON.stringify(data, null, 2);
     resultBox.className = "result success";
   } catch (error) {
     resultBox.textContent =
-      `Error al conectar con el backend.\n\n` +
-      `Detalle: ${error.message}\n\n` +
-      `¿Está corriendo el servidor en ${BACKEND_URL}?`;
+      `Error connecting to backend.\n\n` +
+      `Details: ${error.message}\n\n` +
+      `Is the server running at ${BACKEND_URL}?`;
     resultBox.className = "result error";
   } finally {
     btn.disabled = false;
@@ -147,7 +153,7 @@ async function saveTradingDay(event) {
   const msgBox = document.getElementById("formMsg");
 
   btn.disabled = true;
-  btn.textContent = "Guardando...";
+  btn.textContent = "Saving...";
   msgBox.className = "result hidden";
   msgBox.textContent = "";
 
@@ -162,17 +168,17 @@ async function saveTradingDay(event) {
   };
 
   if (!payload.trade_date) {
-    msgBox.textContent = "La fecha es obligatoria.";
+    msgBox.textContent = "Date is required.";
     msgBox.className = "result error";
     btn.disabled = false;
-    btn.textContent = "Guardar Trading Day";
+    btn.textContent = "Save Trading Day";
     return;
   }
   if (!payload.market) {
-    msgBox.textContent = "El mercado es obligatorio.";
+    msgBox.textContent = "Market is required.";
     msgBox.className = "result error";
     btn.disabled = false;
-    btn.textContent = "Guardar Trading Day";
+    btn.textContent = "Save Trading Day";
     return;
   }
 
@@ -188,26 +194,26 @@ async function saveTradingDay(event) {
       throw new Error(err.detail || `Error ${response.status}`);
     }
 
-    msgBox.textContent = "Trading day guardado correctamente.";
+    msgBox.textContent = "Trading day saved successfully.";
     msgBox.className = "result success";
     document.getElementById("trading_day_form").reset();
     await loadTradingDays();
   } catch (error) {
-    msgBox.textContent = `Error al guardar: ${error.message}`;
+    msgBox.textContent = `Error saving: ${error.message}`;
     msgBox.className = "result error";
   } finally {
     btn.disabled = false;
-    btn.textContent = "Guardar Trading Day";
+    btn.textContent = "Save Trading Day";
   }
 }
 
 async function loadTradingDays() {
   const listEl = document.getElementById("tradingDaysList");
-  listEl.innerHTML = `<p class="empty-state">Cargando...</p>`;
+  listEl.innerHTML = `<p class="empty-state">Loading...</p>`;
 
   try {
     const response = await fetch(`${BACKEND_URL}/trading-days`);
-    if (!response.ok) throw new Error(`Estado: ${response.status}`);
+    if (!response.ok) throw new Error(`Status: ${response.status}`);
     const days = await response.json();
 
     tradingDaysCache = days;
@@ -218,7 +224,7 @@ async function loadTradingDays() {
   } catch (error) {
     listEl.innerHTML =
       `<p class="empty-state" style="color:#f87171;">` +
-      `Error al cargar: ${error.message}` +
+      `Error loading: ${error.message}` +
       `</p>`;
   }
 }
@@ -227,7 +233,7 @@ function populateDaySelect(selectId, days) {
   const select = document.getElementById(selectId);
   if (!select) return;
   const currentValue = select.value;
-  select.innerHTML = '<option value="">— Selecciona un trading day —</option>';
+  select.innerHTML = '<option value="">— Select a trading day —</option>';
   days.forEach((day) => {
     const opt = document.createElement("option");
     opt.value = day.id;
@@ -241,19 +247,19 @@ function renderTradingDays(days) {
   const listEl = document.getElementById("tradingDaysList");
 
   if (days.length === 0) {
-    listEl.innerHTML = `<p class="empty-state">No hay trading days registrados todavía.</p>`;
+    listEl.innerHTML = `<p class="empty-state">No trading days registered yet.</p>`;
     return;
   }
 
   listEl.innerHTML = days.map((day) => {
-    const date = new Date(day.trade_date + "T00:00:00").toLocaleDateString("es-ES", {
+    const date = new Date(day.trade_date + "T00:00:00").toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
     });
 
-    const newsTag = `<span class="tag ${day.is_news_day ? "tag-active" : "tag-inactive"}">Noticias</span>`;
+    const newsTag = `<span class="tag ${day.is_news_day ? "tag-active" : "tag-inactive"}">News</span>`;
     const athTag  = `<span class="tag ${day.is_ath_context ? "tag-active" : "tag-inactive"}">ATH</span>`;
     const notesHtml = day.notes ? `<p class="day-notes">${escapeHtml(day.notes)}</p>` : "";
 
@@ -265,13 +271,13 @@ function renderTradingDays(days) {
         </div>
         <div class="day-tags">${newsTag}${athTag}</div>
         ${notesHtml}
-        <p class="day-created">Registrado: ${formatDateTime(day.created_at)}</p>
+        <p class="day-created">Registered: ${formatDateTime(day.created_at)}</p>
       </div>
     `;
   }).join("");
 }
 
-// ─── Daily Bias — lógica de derivación ───────────────────────────────────────
+// ─── Daily Bias — derivation logic ───────────────────────────────────────────
 
 function deriveBiasValues(priceZone, pendingLiquidity, hadSweep, hadReaction) {
   const sweepOk    = hadSweep    === "yes";
@@ -293,7 +299,7 @@ function deriveBiasValues(priceZone, pendingLiquidity, hadSweep, hadReaction) {
   return { bias_direction, bias_alignment, bias_active };
 }
 
-// ─── Daily Bias — toggle avanzado ────────────────────────────────────────────
+// ─── Daily Bias — advanced toggle ────────────────────────────────────────────
 
 function toggleAdvanced() {
   const panel    = document.getElementById("advancedFields");
@@ -301,13 +307,13 @@ function toggleAdvanced() {
   const isHidden = panel.classList.contains("hidden");
 
   panel.classList.toggle("hidden");
-  btn.textContent = isHidden ? "Ocultar campos avanzados" : "Mostrar campos avanzados";
+  btn.textContent = isHidden ? "Hide advanced fields" : "Show advanced fields";
 }
 
 function resetBiasForm() {
   document.getElementById("dailyBiasForm").reset();
   document.getElementById("advancedFields").classList.add("hidden");
-  document.getElementById("toggleAdvancedBtn").textContent = "Mostrar campos avanzados";
+  document.getElementById("toggleAdvancedBtn").textContent = "Show advanced fields";
 }
 
 // ─── Daily Bias — POST ────────────────────────────────────────────────────────
@@ -319,7 +325,7 @@ async function saveDailyBias(event) {
   const msgBox = document.getElementById("biasFormMsg");
 
   btn.disabled = true;
-  btn.textContent = "Guardando...";
+  btn.textContent = "Saving...";
   msgBox.className = "result hidden";
   msgBox.textContent = "";
 
@@ -356,10 +362,10 @@ async function saveDailyBias(event) {
   };
 
   if (!payload.trading_day_id || isNaN(payload.trading_day_id)) {
-    msgBox.textContent = "Debes seleccionar un Trading Day.";
+    msgBox.textContent = "You must select a Trading Day.";
     msgBox.className = "result error";
     btn.disabled = false;
-    btn.textContent = "Guardar Daily Bias";
+    btn.textContent = "Save Daily Bias";
     return;
   }
 
@@ -375,16 +381,16 @@ async function saveDailyBias(event) {
       throw new Error(err.detail || `Error ${response.status}`);
     }
 
-    msgBox.textContent = "Daily bias guardado correctamente.";
+    msgBox.textContent = "Daily bias saved successfully.";
     msgBox.className = "result success";
     resetBiasForm();
     await loadDailyBias();
   } catch (error) {
-    msgBox.textContent = `Error al guardar: ${error.message}`;
+    msgBox.textContent = `Error saving: ${error.message}`;
     msgBox.className = "result error";
   } finally {
     btn.disabled = false;
-    btn.textContent = "Guardar Daily Bias";
+    btn.textContent = "Save Daily Bias";
   }
 }
 
@@ -392,11 +398,11 @@ async function saveDailyBias(event) {
 
 async function loadDailyBias() {
   const listEl = document.getElementById("dailyBiasList");
-  listEl.innerHTML = `<p class="empty-state">Cargando...</p>`;
+  listEl.innerHTML = `<p class="empty-state">Loading...</p>`;
 
   try {
     const response = await fetch(`${BACKEND_URL}/daily-bias`);
-    if (!response.ok) throw new Error(`Estado: ${response.status}`);
+    if (!response.ok) throw new Error(`Status: ${response.status}`);
     const biases = await response.json();
 
     dailyBiasCache = biases;
@@ -405,7 +411,7 @@ async function loadDailyBias() {
   } catch (error) {
     listEl.innerHTML =
       `<p class="empty-state" style="color:#f87171;">` +
-      `Error al cargar: ${error.message}` +
+      `Error loading: ${error.message}` +
       `</p>`;
   }
 }
@@ -414,7 +420,7 @@ function populateBiasSelect(biases) {
   const select = document.getElementById("trade_daily_bias_id");
   if (!select) return;
   const currentValue = select.value;
-  select.innerHTML = '<option value="">— Ninguno —</option>';
+  select.innerHTML = '<option value="">— None —</option>';
   biases.forEach((bias) => {
     const day = tradingDaysCache.find((d) => d.id === bias.trading_day_id);
     const dayLabel = day ? `${day.trade_date} — ${day.market}` : `Day #${bias.trading_day_id}`;
@@ -430,7 +436,7 @@ function renderDailyBias(biases) {
   const listEl = document.getElementById("dailyBiasList");
 
   if (biases.length === 0) {
-    listEl.innerHTML = `<p class="empty-state">No hay daily bias registrados todavía.</p>`;
+    listEl.innerHTML = `<p class="empty-state">No daily bias registered yet.</p>`;
     return;
   }
 
@@ -447,9 +453,9 @@ function renderDailyBias(biases) {
       : "badge-none";
 
     const invalidationHtml = bias.invalidated && bias.invalidation_reason
-      ? `<div class="bias-invalidation">Invalidado: ${escapeHtml(bias.invalidation_reason)}</div>`
+      ? `<div class="bias-invalidation">Invalidated: ${escapeHtml(bias.invalidation_reason)}</div>`
       : bias.invalidated
-      ? `<div class="bias-invalidation">Invalidado</div>`
+      ? `<div class="bias-invalidation">Invalidated</div>`
       : "";
 
     const commentsHtml = bias.comments
@@ -462,17 +468,17 @@ function renderDailyBias(biases) {
           <span class="bias-day-label">${escapeHtml(dayLabel)}</span>
           <div class="bias-badges">
             <span class="badge-direction ${dirClass}">${bias.bias_direction}</span>
-            <span class="${bias.bias_active ? "badge-active" : "badge-inactive"}">${bias.bias_active ? "Activo" : "Inactivo"}</span>
+            <span class="${bias.bias_active ? "badge-active" : "badge-inactive"}">${bias.bias_active ? "Active" : "Inactive"}</span>
           </div>
         </div>
         <div class="bias-flags">
           <span class="bias-flag ${bias.bias_alignment   ? "bias-flag-on" : "bias-flag-off"}">Alignment</span>
           <span class="bias-flag ${bias.chop_equilibrium ? "bias-flag-on" : "bias-flag-off"}">Chop EQ</span>
-          <span class="bias-flag ${bias.invalidated      ? "bias-flag-on" : "bias-flag-off"}">Invalidado</span>
+          <span class="bias-flag ${bias.invalidated      ? "bias-flag-on" : "bias-flag-off"}">Invalidated</span>
         </div>
         ${invalidationHtml}
         ${commentsHtml}
-        <p class="bias-created">Registrado: ${formatDateTime(bias.created_at)}</p>
+        <p class="bias-created">Registered: ${formatDateTime(bias.created_at)}</p>
       </div>
     `;
   }).join("");
@@ -487,7 +493,7 @@ async function saveTrade(event) {
   const msgBox = document.getElementById("tradeFormMsg");
 
   btn.disabled = true;
-  btn.textContent = "Guardando...";
+  btn.textContent = "Saving...";
   msgBox.className = "result hidden";
   msgBox.textContent = "";
 
@@ -517,10 +523,10 @@ async function saveTrade(event) {
   };
 
   if (!payload.trading_day_id || isNaN(payload.trading_day_id)) {
-    msgBox.textContent = "Debes seleccionar un Trading Day.";
+    msgBox.textContent = "You must select a Trading Day.";
     msgBox.className = "result error";
     btn.disabled = false;
-    btn.textContent = "Guardar Trade";
+    btn.textContent = "Save Trade";
     return;
   }
 
@@ -550,7 +556,7 @@ async function saveTrade(event) {
         const img = await upResp.json();
         const preview = document.getElementById("trade_image_file_preview");
         if (preview) {
-          preview.innerHTML = `<img src="${escapeHtml(img.image_url)}" alt="imagen subida" style="max-width:100%;border-radius:6px;margin-top:8px;" />`;
+          preview.innerHTML = `<img src="${escapeHtml(img.image_url)}" alt="uploaded image" style="max-width:100%;border-radius:6px;margin-top:8px;" />`;
           preview.classList.remove("hidden");
         }
       }
@@ -562,16 +568,16 @@ async function saveTrade(event) {
       });
     }
 
-    msgBox.textContent = "Trade guardado correctamente.";
+    msgBox.textContent = "Trade saved successfully.";
     msgBox.className = "result success";
     document.getElementById("trade_form").reset();
     await loadTrades();
   } catch (error) {
-    msgBox.textContent = `Error al guardar: ${error.message}`;
+    msgBox.textContent = `Error saving: ${error.message}`;
     msgBox.className = "result error";
   } finally {
     btn.disabled = false;
-    btn.textContent = "Guardar Trade";
+    btn.textContent = "Save Trade";
   }
 }
 
@@ -579,14 +585,14 @@ async function saveTrade(event) {
 
 async function loadTrades() {
   const listEl = document.getElementById("tradesList");
-  listEl.innerHTML = `<p class="empty-state">Cargando...</p>`;
+  listEl.innerHTML = `<p class="empty-state">Loading...</p>`;
 
   try {
     const [tradesRes, imagesRes] = await Promise.all([
       fetch(`${BACKEND_URL}/trades`),
       fetch(`${BACKEND_URL}/trade-images`),
     ]);
-    if (!tradesRes.ok) throw new Error(`Estado: ${tradesRes.status}`);
+    if (!tradesRes.ok) throw new Error(`Status: ${tradesRes.status}`);
     tradesCache = await tradesRes.json();
     tradeImagesCache = imagesRes.ok ? await imagesRes.json() : [];
     populateMarketFilter();
@@ -594,7 +600,7 @@ async function loadTrades() {
   } catch (error) {
     listEl.innerHTML =
       `<p class="empty-state" style="color:#f87171;">` +
-      `Error al cargar: ${error.message}` +
+      `Error loading: ${error.message}` +
       `</p>`;
   }
 }
@@ -604,7 +610,7 @@ function populateMarketFilter() {
   if (!select) return;
   const currentValue = select.value;
   const markets = [...new Set(tradingDaysCache.map(d => d.market).filter(Boolean))].sort();
-  select.innerHTML = '<option value="">Todos</option>';
+  select.innerHTML = '<option value="">All</option>';
   markets.forEach(m => {
     const opt = document.createElement("option");
     opt.value = m;
@@ -666,17 +672,16 @@ function renderTrades(trades) {
   const countEl = document.getElementById("tradesCount");
 
   if (countEl) {
-    countEl.textContent = `Mostrando ${trades.length} de ${tradesCache.length} trades`;
+    countEl.textContent = `Showing ${trades.length} of ${tradesCache.length} trades`;
   }
 
   if (trades.length === 0) {
     listEl.innerHTML = tradesCache.length === 0
-      ? `<p class="empty-state">No hay trades registrados todavía.</p>`
-      : `<p class="empty-state">Ningún trade coincide con los filtros.</p>`;
+      ? `<p class="empty-state">No trades registered yet.</p>`
+      : `<p class="empty-state">No trades match the filters.</p>`;
     return;
   }
 
-  // Group by trading_day_id
   const groups = new Map();
   trades.forEach(t => {
     const id = t.trading_day_id;
@@ -684,7 +689,6 @@ function renderTrades(trades) {
     groups.get(id).push(t);
   });
 
-  // Sort groups by date, newest first
   const sortedGroups = [...groups.entries()].sort((a, b) => {
     const dA = tradingDaysCache.find(d => d.id === a[0])?.trade_date ?? "";
     const dB = tradingDaysCache.find(d => d.id === b[0])?.trade_date ?? "";
@@ -727,7 +731,6 @@ function renderTrades(trades) {
 }
 
 function renderTradeCard(trade) {
-  // Border highlight class
   const hasTechError  = (trade.technical_error_label  || "").startsWith("Error");
   const hasPsychError = (trade.psychology_error_label || "").startsWith("Error") || !!trade.emotional_label;
   const highlightCls  = trade.trade_grade === "A+" ? "highlight-aplus"
@@ -735,7 +738,6 @@ function renderTradeCard(trade) {
     : hasPsychError ? "highlight-psychology"
     : "";
 
-  // Result background class
   const resultBgCls = trade.result_r != null
     ? (trade.result_r > 0 ? "trade-positive" : trade.result_r < 0 ? "trade-negative" : "trade-be")
     : "";
@@ -753,11 +755,11 @@ function renderTradeCard(trade) {
   }
 
   const notesHtml  = trade.notes ? `<p class="bias-text">${escapeHtml(trade.notes)}</p>` : "";
-  const typeLabels = { entrada: "Entrada", salida: "Salida", contexto: "Contexto" };
+  const typeLabels = { entrada: "Entry", salida: "Exit", contexto: "Context" };
   const tradeImages = tradeImagesCache.filter(img => img.trade_id === trade.id);
   const imagesHtml  = tradeImages.length
     ? `<div class="trade-images">${tradeImages.map(img =>
-        `<a href="${escapeHtml(img.image_url)}" target="_blank" rel="noopener" class="trade-image-link">${typeLabels[img.image_type] || img.image_type}: Ver imagen</a>`
+        `<a href="${escapeHtml(img.image_url)}" target="_blank" rel="noopener" class="trade-image-link">${typeLabels[img.image_type] || img.image_type}: View image</a>`
       ).join("")}</div>`
     : "";
 
@@ -782,14 +784,14 @@ function renderTradeCard(trade) {
       <span class="analysis-chip analysis-quality">${escapeHtml(trade.execution_quality_label || "")}</span>
     </div>` : "";
 
-  const emotionLabels = { calmado: "Calmado", ansioso: "Ansioso", fomo: "FOMO", frustrado: "Frustrado", neutral: "Neutral" };
-  const exitLabels    = { por_plan: "Por plan", por_miedo: "Por miedo", por_impulso: "Por impulso", manual: "Manual", otro: "Otro" };
+  const emotionLabels = { calmado: "Calm", ansioso: "Anxious", fomo: "FOMO", frustrado: "Frustrated", neutral: "Neutral" };
+  const exitLabels    = { por_plan: "By plan", por_miedo: "By fear", por_impulso: "By impulse", manual: "Manual", otro: "Other" };
   const psychoParts   = [];
   if (trade.followed_rules != null) {
-    psychoParts.push(`<span class="bias-flag ${trade.followed_rules ? "bias-flag-on" : "bias-flag-off"}">${trade.followed_rules ? "Siguió reglas" : "No siguió reglas"}</span>`);
+    psychoParts.push(`<span class="bias-flag ${trade.followed_rules ? "bias-flag-on" : "bias-flag-off"}">${trade.followed_rules ? "Followed rules" : "Broke rules"}</span>`);
   }
-  if (trade.emotional_state) psychoParts.push(`<span class="bias-dir-chip">Estado: <span>${emotionLabels[trade.emotional_state] || trade.emotional_state}</span></span>`);
-  if (trade.exit_reason)     psychoParts.push(`<span class="bias-dir-chip">Salida: <span>${exitLabels[trade.exit_reason] || trade.exit_reason}</span></span>`);
+  if (trade.emotional_state) psychoParts.push(`<span class="bias-dir-chip">State: <span>${emotionLabels[trade.emotional_state] || trade.emotional_state}</span></span>`);
+  if (trade.exit_reason)     psychoParts.push(`<span class="bias-dir-chip">Exit: <span>${exitLabels[trade.exit_reason] || trade.exit_reason}</span></span>`);
   const psychoHtml = psychoParts.length ? `<div class="bias-directions">${psychoParts.join("")}</div>` : "";
 
   return `
@@ -802,7 +804,7 @@ function renderTradeCard(trade) {
       ${analysisHtml}
       <div class="bias-levels">
         <div class="bias-level-item">
-          <span class="bias-level-label">Entrada</span>
+          <span class="bias-level-label">Entry</span>
           <span class="bias-level-value">${trade.entry_price}</span>
         </div>
         <div class="bias-level-item">
@@ -814,28 +816,28 @@ function renderTradeCard(trade) {
           <span class="bias-level-value">${trade.take_profit}</span>
         </div>
         <div class="bias-level-item">
-          <span class="bias-level-label">Resultado</span>
+          <span class="bias-level-label">Result</span>
           ${resultHtml}
         </div>
       </div>
       <div class="bias-flags">
-        <span class="bias-flag ${trade.sweep_confirmed  ? "bias-flag-on" : "bias-flag-off"}">Barrida</span>
+        <span class="bias-flag ${trade.sweep_confirmed  ? "bias-flag-on" : "bias-flag-off"}">Sweep</span>
         <span class="bias-flag ${trade.pda_confirmed    ? "bias-flag-on" : "bias-flag-off"}">PDA HTF</span>
         <span class="bias-flag ${trade.ifvg_confirmed   ? "bias-flag-on" : "bias-flag-off"}">IFVG</span>
-        <span class="bias-flag ${trade.vshape_confirmed ? "bias-flag-on" : "bias-flag-off"}">Reversión</span>
+        <span class="bias-flag ${trade.vshape_confirmed ? "bias-flag-on" : "bias-flag-off"}">V-Shape</span>
         <span class="bias-flag ${trade.smt_confirmed    ? "bias-flag-on" : "bias-flag-off"}">SMT</span>
-        <span class="bias-flag ${trade.clean_reaction   ? "bias-flag-on" : "bias-flag-off"}">Rx limpia</span>
+        <span class="bias-flag ${trade.clean_reaction   ? "bias-flag-on" : "bias-flag-off"}">Clean Rx</span>
         <span class="bias-flag ${trade.ny_killzone      ? "bias-flag-on" : "bias-flag-off"}">KZ NY</span>
-        <span class="bias-flag ${trade.setup_valid      ? "bias-flag-on" : "bias-flag-off"}">${trade.setup_valid ? "Setup válido" : "Setup inválido"}</span>
+        <span class="bias-flag ${trade.setup_valid      ? "bias-flag-on" : "bias-flag-off"}">${trade.setup_valid ? "Valid Setup" : "Invalid Setup"}</span>
       </div>
       ${psychoHtml}
       ${imagesHtml}
       ${notesHtml}
-      <p class="bias-created">Registrado: ${formatDateTime(trade.created_at)}</p>
+      <p class="bias-created">Registered: ${formatDateTime(trade.created_at)}</p>
     </div>`;
 }
 
-// ─── Utilidades ───────────────────────────────────────────────────────────────
+// ─── Utilities ────────────────────────────────────────────────────────────────
 
 function formatDateTime(isoString) {
   return new Date(isoString).toLocaleString("en-US", {
@@ -848,7 +850,7 @@ function formatDateTime(isoString) {
   });
 }
 
-// ─── PDF Reports ─────────────────────────────────────────────────────────────
+// ─── PDF Reports ──────────────────────────────────────────────────────────────
 
 async function downloadMonthlyPDF() {
   const yearVal     = parseInt(document.getElementById("pdf_year").value);
@@ -856,22 +858,22 @@ async function downloadMonthlyPDF() {
   const includeImgs = document.getElementById("include_pdf_images")?.checked ?? false;
   const msg         = document.getElementById("pdfMsg");
   if (!yearVal || !monthVal) {
-    msg.textContent = "Selecciona año y mes.";
+    msg.textContent = "Select year and month.";
     msg.className = "result error";
     return;
   }
   if (yearVal < 2000 || yearVal > 2100) {
-    msg.textContent = "Año inválido. Debe estar entre 2000 y 2100.";
+    msg.textContent = "Invalid year. Must be between 2000 and 2100.";
     msg.className = "result error";
     return;
   }
   try {
-    msg.textContent = "Generando PDF...";
+    msg.textContent = "Generating PDF...";
     msg.className = "result";
     let url = `${BACKEND_URL}/reports/monthly/pdf?year=${yearVal}&month=${monthVal}`;
     if (includeImgs) url += "&include_images=true";
     window.open(url, "_blank");
-    msg.textContent = "PDF generado.";
+    msg.textContent = "PDF generated.";
     msg.className = "result success";
     setTimeout(() => msg.classList.add("hidden"), 3000);
   } catch (err) {

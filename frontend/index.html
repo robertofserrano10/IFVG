@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,15 +13,15 @@
       <nav class="sidebar">
         <div class="sidebar-brand">
           <span class="sidebar-title">Trading Journal</span>
-          <span class="sidebar-sub">disciplina · ejecución</span>
+          <span class="sidebar-sub">DISCIPLINE · EXECUTION</span>
         </div>
         <ul class="nav-menu">
           <li class="nav-item active" data-section="dashboard" onclick="showSection('dashboard')">Dashboard</li>
           <li class="nav-item" data-section="trading-day" onclick="showSection('trading-day')">Trading Day</li>
-          <li class="nav-item" data-section="nuevo-trade" onclick="showSection('nuevo-trade')">Nuevo Trade</li>
+          <li class="nav-item" data-section="nuevo-trade" onclick="showSection('nuevo-trade')">New Trade</li>
           <li class="nav-item" data-section="journal" onclick="showSection('journal')">Journal</li>
-          <li class="nav-item" data-section="reportes" onclick="showSection('reportes')">Reportes</li>
-          <li class="nav-item" data-section="estrategia" onclick="showSection('estrategia')">Estrategia</li>
+          <li class="nav-item" data-section="reportes" onclick="showSection('reportes')">Reports</li>
+          <li class="nav-item" data-section="estrategia" onclick="showSection('estrategia')">Strategy</li>
         </ul>
       </nav>
 
@@ -34,16 +34,16 @@
             <div class="section-header">
               <div>
                 <h2 class="section-title">Dashboard</h2>
-                <p class="section-subtitle">Resumen de rendimiento y disciplina</p>
+                <p class="section-subtitle">Performance and discipline overview</p>
               </div>
               <button id="testBtn" onclick="testConnection()" class="btn-sm">Test Backend</button>
             </div>
             <div id="result" class="result hidden"></div>
 
             <div class="card">
-              <h3 class="card-title">Resumen del Journal</h3>
+              <h3 class="card-title">Journal Summary</h3>
               <div id="metricsSummary">
-                <p class="empty-state">Cargando...</p>
+                <p class="empty-state">Loading...</p>
               </div>
             </div>
           </section>
@@ -53,93 +53,93 @@
             <div class="section-header">
               <div>
                 <h2 class="section-title">Trading Day</h2>
-                <p class="section-subtitle">Registra condiciones de mercado y bias diario</p>
+                <p class="section-subtitle">Register market conditions and daily bias</p>
               </div>
             </div>
 
             <div class="section-grid">
-              <!-- Crear Trading Day -->
+              <!-- Create Trading Day -->
               <div class="card">
-                <h3 class="card-title">Crear Trading Day</h3>
-                <p class="card-desc">Registra un nuevo día con sus condiciones de mercado.</p>
+                <h3 class="card-title">Create Trading Day</h3>
+                <p class="card-desc">Register a new day with its market conditions.</p>
 
                 <form id="trading_day_form" onsubmit="saveTradingDay(event)">
                   <div class="form-group">
-                    <label for="trade_date">Fecha</label>
+                    <label for="trade_date">Date</label>
                     <input type="date" id="trade_date" required />
                   </div>
                   <div class="form-group">
-                    <label for="market">Mercado</label>
-                    <input type="text" id="market" placeholder="Ej: NQ, ES, MNQ" required />
+                    <label for="market">Market</label>
+                    <input type="text" id="market" placeholder="e.g. NQ, ES, MNQ" required />
                   </div>
                   <div class="form-group checkbox-group">
-                    <label><input type="checkbox" id="is_news_day" /> Día de noticias</label>
-                    <label><input type="checkbox" id="is_ath_context" /> Contexto ATH</label>
+                    <label><input type="checkbox" id="is_news_day" /> News day</label>
+                    <label><input type="checkbox" id="is_ath_context" /> ATH Context</label>
                   </div>
                   <div class="form-group">
-                    <label for="notes">Notas</label>
-                    <textarea id="notes" placeholder="Observaciones del día..." rows="3"></textarea>
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" placeholder="Day observations..." rows="3"></textarea>
                   </div>
-                  <button type="submit" id="saveBtn">Guardar Trading Day</button>
+                  <button type="submit" id="saveBtn">Save Trading Day</button>
                   <div id="formMsg" class="result hidden"></div>
                 </form>
               </div>
 
-              <!-- Crear Daily Bias -->
+              <!-- Create Daily Bias -->
               <div class="card">
-                <h3 class="card-title">Crear Daily Bias</h3>
-                <p class="card-desc">Responde las preguntas. El bias se calcula automáticamente.</p>
+                <h3 class="card-title">Create Daily Bias</h3>
+                <p class="card-desc">Answer the questions. Bias is calculated automatically.</p>
 
                 <form id="dailyBiasForm" onsubmit="saveDailyBias(event)">
                   <div class="form-group">
                     <label for="bias_trading_day_id">Trading Day</label>
                     <select id="bias_trading_day_id" required>
-                      <option value="">— Selecciona un trading day —</option>
+                      <option value="">— Select a trading day —</option>
                     </select>
                   </div>
                   <div class="form-group">
-                    <label for="price_zone">¿Dónde está el precio?</label>
+                    <label for="price_zone">Where is price?</label>
                     <select id="price_zone" required>
-                      <option value="">— Selecciona —</option>
+                      <option value="">— Select —</option>
                       <option value="premium">Premium</option>
                       <option value="discount">Discount</option>
                     </select>
                   </div>
                   <div class="form-group">
-                    <label for="pending_liquidity">¿Qué liquidez está pendiente?</label>
+                    <label for="pending_liquidity">What liquidity is pending?</label>
                     <select id="pending_liquidity" required>
-                      <option value="">— Selecciona —</option>
+                      <option value="">— Select —</option>
                       <option value="highs">Highs</option>
                       <option value="lows">Lows</option>
                     </select>
                   </div>
                   <div class="form-group">
-                    <label for="had_sweep">¿Hubo sweep?</label>
+                    <label for="had_sweep">Was there a sweep?</label>
                     <select id="had_sweep" required>
-                      <option value="">— Selecciona —</option>
-                      <option value="yes">Sí</option>
+                      <option value="">— Select —</option>
+                      <option value="yes">Yes</option>
                       <option value="no">No</option>
                     </select>
                   </div>
                   <div class="form-group">
-                    <label for="had_reaction">¿Hubo reacción fuerte?</label>
+                    <label for="had_reaction">Was there a strong reaction?</label>
                     <select id="had_reaction" required>
-                      <option value="">— Selecciona —</option>
-                      <option value="yes">Sí</option>
+                      <option value="">— Select —</option>
+                      <option value="yes">Yes</option>
                       <option value="no">No</option>
                     </select>
                   </div>
                   <div class="form-group">
-                    <label for="bias_comments">Comentarios</label>
-                    <textarea id="bias_comments" placeholder="Notas del bias..." rows="2"></textarea>
+                    <label for="bias_comments">Comments</label>
+                    <textarea id="bias_comments" placeholder="Bias notes..." rows="2"></textarea>
                   </div>
 
                   <button type="button" id="toggleAdvancedBtn" onclick="toggleAdvanced()">
-                    Mostrar campos avanzados
+                    Show advanced fields
                   </button>
 
                   <div id="advancedFields" class="advanced-fields hidden">
-                    <p class="form-section-label">Precios</p>
+                    <p class="form-section-label">Prices</p>
                     <div class="form-cols">
                       <div class="form-group">
                         <label for="bias_daily_high">Daily High</label>
@@ -159,7 +159,7 @@
                       </div>
                     </div>
 
-                    <p class="form-section-label">Sesión Asia</p>
+                    <p class="form-section-label">Asia Session</p>
                     <div class="form-cols">
                       <div class="form-group">
                         <label for="bias_asia_high">Asia High</label>
@@ -171,7 +171,7 @@
                       </div>
                     </div>
 
-                    <p class="form-section-label">Sesión Londres</p>
+                    <p class="form-section-label">London Session</p>
                     <div class="form-cols">
                       <div class="form-group">
                         <label for="bias_london_high">London High</label>
@@ -183,7 +183,7 @@
                       </div>
                     </div>
 
-                    <p class="form-section-label">Análisis</p>
+                    <p class="form-section-label">Analysis</p>
                     <div class="form-group">
                       <label for="bias_zone_position">Zone Position</label>
                       <select id="bias_zone_position">
@@ -210,18 +210,18 @@
                       </select>
                     </div>
 
-                    <p class="form-section-label">Estado</p>
+                    <p class="form-section-label">Status</p>
                     <div class="form-group checkbox-group">
                       <label><input type="checkbox" id="bias_chop_equilibrium" /> Chop / Equilibrium</label>
-                      <label><input type="checkbox" id="bias_invalidated" /> Invalidado</label>
+                      <label><input type="checkbox" id="bias_invalidated" /> Invalidated</label>
                     </div>
                     <div class="form-group">
-                      <label for="bias_invalidation_reason">Razón de invalidación</label>
-                      <textarea id="bias_invalidation_reason" placeholder="Solo si está invalidado..." rows="2"></textarea>
+                      <label for="bias_invalidation_reason">Invalidation reason</label>
+                      <textarea id="bias_invalidation_reason" placeholder="Only if invalidated..." rows="2"></textarea>
                     </div>
                   </div>
 
-                  <button type="submit" id="saveBiasBtn">Guardar Daily Bias</button>
+                  <button type="submit" id="saveBiasBtn">Save Daily Bias</button>
                   <div id="biasFormMsg" class="result hidden"></div>
                 </form>
               </div>
@@ -229,71 +229,71 @@
 
             <!-- Trading Days List -->
             <div class="card">
-              <h3 class="card-title">Trading Days Registrados</h3>
+              <h3 class="card-title">Registered Trading Days</h3>
               <div id="tradingDaysList">
-                <p class="empty-state">Cargando...</p>
+                <p class="empty-state">Loading...</p>
               </div>
             </div>
 
             <!-- Daily Bias List -->
             <div class="card">
-              <h3 class="card-title">Daily Bias Registrados</h3>
+              <h3 class="card-title">Registered Daily Bias</h3>
               <div id="dailyBiasList">
-                <p class="empty-state">Cargando...</p>
+                <p class="empty-state">Loading...</p>
               </div>
             </div>
           </section>
 
-          <!-- ══ NUEVO TRADE ════════════════════════════════════════════ -->
+          <!-- ══ NEW TRADE ══════════════════════════════════════════════ -->
           <section class="app-section" id="section-nuevo-trade">
             <div class="section-header">
               <div>
-                <h2 class="section-title">Nuevo Trade</h2>
-                <p class="section-subtitle">Registra una ejecución completa</p>
+                <h2 class="section-title">New Trade</h2>
+                <p class="section-subtitle">Register a complete execution</p>
               </div>
             </div>
 
             <div class="card">
-              <h3 class="card-title">Registrar Trade</h3>
-              <p class="card-desc">Registra una operación real asociada a un día y un bias.</p>
+              <h3 class="card-title">Register Trade</h3>
+              <p class="card-desc">Register a real trade associated with a day and bias.</p>
 
               <form id="trade_form" onsubmit="saveTrade(event)">
                 <div class="form-group">
                   <label for="trade_trading_day_id">Trading Day</label>
                   <select id="trade_trading_day_id" required>
-                    <option value="">— Selecciona un trading day —</option>
+                    <option value="">— Select a trading day —</option>
                   </select>
                 </div>
                 <div class="form-group">
                   <label for="trade_daily_bias_id">Daily Bias</label>
                   <select id="trade_daily_bias_id">
-                    <option value="">— Ninguno —</option>
+                    <option value="">— None —</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="trade_direction">Dirección</label>
+                  <label for="trade_direction">Direction</label>
                   <select id="trade_direction" required>
-                    <option value="">— Selecciona —</option>
+                    <option value="">— Select —</option>
                     <option value="long">Long</option>
                     <option value="short">Short</option>
                   </select>
                 </div>
 
-                <p class="form-section-label">Confirmaciones</p>
+                <p class="form-section-label">Confirmations</p>
                 <div class="form-group checkbox-group">
-                  <label><input type="checkbox" id="trade_sweep_confirmed" /> Sweep confirmado</label>
-                  <label><input type="checkbox" id="trade_pda_confirmed" /> Confirmó PDA HTF</label>
-                  <label><input type="checkbox" id="trade_ifvg_confirmed" /> iFVG confirmado</label>
-                  <label><input type="checkbox" id="trade_vshape_confirmed" /> V-Shape confirmado</label>
-                  <label><input type="checkbox" id="trade_smt_confirmed" /> SMT confirmado</label>
-                  <label><input type="checkbox" id="trade_clean_reaction" /> Reacción limpia</label>
-                  <label><input type="checkbox" id="trade_ny_killzone" /> Dentro de Killzone NY</label>
+                  <label><input type="checkbox" id="trade_sweep_confirmed" /> Sweep confirmed</label>
+                  <label><input type="checkbox" id="trade_pda_confirmed" /> PDA HTF confirmed</label>
+                  <label><input type="checkbox" id="trade_ifvg_confirmed" /> iFVG confirmed</label>
+                  <label><input type="checkbox" id="trade_vshape_confirmed" /> V-Shape confirmed</label>
+                  <label><input type="checkbox" id="trade_smt_confirmed" /> SMT confirmed</label>
+                  <label><input type="checkbox" id="trade_clean_reaction" /> Clean reaction</label>
+                  <label><input type="checkbox" id="trade_ny_killzone" /> Within NY Killzone</label>
                 </div>
 
                 <div class="form-group">
-                  <label for="trade_liquidity_type">Tipo de liquidez</label>
+                  <label for="trade_liquidity_type">Liquidity Type</label>
                   <select id="trade_liquidity_type">
-                    <option value="">— Opcional —</option>
+                    <option value="">— Optional —</option>
                     <option value="asia">Asia</option>
                     <option value="london">London</option>
                     <option value="pdh">PDH</option>
@@ -309,11 +309,11 @@
                     <option value="daily_50">Daily 50%</option>
                     <option value="internal">Internal</option>
                     <option value="micro">Micro</option>
-                    <option value="other">Otro</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
 
-                <p class="form-section-label">Precios</p>
+                <p class="form-section-label">Prices</p>
                 <div class="form-cols">
                   <div class="form-group">
                     <label for="trade_entry_price">Entry Price</label>
@@ -329,62 +329,62 @@
                   </div>
                   <div class="form-group">
                     <label for="trade_result_r">Result (R)</label>
-                    <input type="number" id="trade_result_r" step="0.01" placeholder="Opcional" />
+                    <input type="number" id="trade_result_r" step="0.01" placeholder="Optional" />
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="trade_notes">Notas</label>
-                  <textarea id="trade_notes" placeholder="Observaciones del trade..." rows="2"></textarea>
+                  <label for="trade_notes">Notes</label>
+                  <textarea id="trade_notes" placeholder="Trade observations..." rows="2"></textarea>
                 </div>
 
-                <p class="form-section-label">Psicología</p>
+                <p class="form-section-label">Psychology</p>
                 <div class="form-group checkbox-group">
-                  <label><input type="checkbox" id="trade_followed_rules" /> ¿Seguí mis reglas?</label>
+                  <label><input type="checkbox" id="trade_followed_rules" /> Followed my rules?</label>
                 </div>
                 <div class="form-group">
-                  <label for="trade_emotional_state">Estado emocional</label>
+                  <label for="trade_emotional_state">Emotional State</label>
                   <select id="trade_emotional_state">
-                    <option value="">— Opcional —</option>
-                    <option value="calmado">Calmado</option>
-                    <option value="ansioso">Ansioso</option>
+                    <option value="">— Optional —</option>
+                    <option value="calmado">Calm</option>
+                    <option value="ansioso">Anxious</option>
                     <option value="fomo">FOMO</option>
-                    <option value="frustrado">Frustrado</option>
+                    <option value="frustrado">Frustrated</option>
                     <option value="neutral">Neutral</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="trade_exit_reason">Salida</label>
+                  <label for="trade_exit_reason">Exit</label>
                   <select id="trade_exit_reason">
-                    <option value="">— Opcional —</option>
-                    <option value="por_plan">Por plan</option>
-                    <option value="por_miedo">Por miedo</option>
-                    <option value="por_impulso">Por impulso</option>
+                    <option value="">— Optional —</option>
+                    <option value="por_plan">By plan</option>
+                    <option value="por_miedo">By fear</option>
+                    <option value="por_impulso">By impulse</option>
                     <option value="manual">Manual</option>
-                    <option value="otro">Otro</option>
+                    <option value="otro">Other</option>
                   </select>
                 </div>
 
-                <p class="form-section-label">Imagen</p>
+                <p class="form-section-label">Image</p>
                 <div class="form-group">
-                  <label for="trade_image_file">Subir imagen (PNG/JPEG, máx 5 MB)</label>
+                  <label for="trade_image_file">Upload image (PNG/JPEG, max 5 MB)</label>
                   <input type="file" id="trade_image_file" accept="image/png,image/jpeg" />
                   <div id="trade_image_file_preview" class="image-preview hidden"></div>
                 </div>
                 <div class="form-group">
-                  <label for="trade_image_url">O pegar URL (opcional)</label>
+                  <label for="trade_image_url">Or paste URL (optional)</label>
                   <input type="url" id="trade_image_url" placeholder="https://..." />
                 </div>
                 <div class="form-group">
-                  <label for="trade_image_type">Tipo de imagen</label>
+                  <label for="trade_image_type">Image type</label>
                   <select id="trade_image_type">
-                    <option value="entrada">Entrada</option>
-                    <option value="salida">Salida</option>
-                    <option value="contexto">Contexto</option>
+                    <option value="entrada">Entry</option>
+                    <option value="salida">Exit</option>
+                    <option value="contexto">Context</option>
                   </select>
                 </div>
 
-                <button type="submit" id="saveTradeBtn">Guardar Trade</button>
+                <button type="submit" id="saveTradeBtn">Save Trade</button>
                 <div id="tradeFormMsg" class="result hidden"></div>
               </form>
             </div>
@@ -395,18 +395,18 @@
             <div class="section-header">
               <div>
                 <h2 class="section-title">Journal</h2>
-                <p class="section-subtitle">Revisa, filtra y analiza tus trades</p>
+                <p class="section-subtitle">Review, filter, and analyze your trades</p>
               </div>
             </div>
 
             <div class="card">
-              <h3 class="card-title">Trades Registrados</h3>
+              <h3 class="card-title">Registered Trades</h3>
               <div class="trade-filters">
                 <div class="search-wrapper">
                   <input
                     type="text"
                     id="trade_search"
-                    placeholder="Buscar por mercado, dirección, liquidez, notas..."
+                    placeholder="Search by market, direction, liquidity, notes..."
                     oninput="applyTradeFilters()"
                   />
                 </div>
@@ -414,15 +414,15 @@
                   <div class="filter-group">
                     <label for="filter_setup">Setup</label>
                     <select id="filter_setup" onchange="applyTradeFilters()">
-                      <option value="">Todos</option>
-                      <option value="valid">Setup válido</option>
-                      <option value="invalid">Setup inválido</option>
+                      <option value="">All</option>
+                      <option value="valid">Valid setup</option>
+                      <option value="invalid">Invalid setup</option>
                     </select>
                   </div>
                   <div class="filter-group">
                     <label for="filter_grade">Grade</label>
                     <select id="filter_grade" onchange="applyTradeFilters()">
-                      <option value="">Todos</option>
+                      <option value="">All</option>
                       <option value="A+">A+</option>
                       <option value="A">A</option>
                       <option value="B">B</option>
@@ -431,44 +431,44 @@
                     </select>
                   </div>
                   <div class="filter-group">
-                    <label for="filter_disciplina">Disciplina</label>
+                    <label for="filter_disciplina">Discipline</label>
                     <select id="filter_disciplina" onchange="applyTradeFilters()">
-                      <option value="">Todos</option>
-                      <option value="disciplinado">Disciplinado</option>
+                      <option value="">All</option>
+                      <option value="disciplinado">Disciplined</option>
                       <option value="error">Error</option>
                     </select>
                   </div>
                   <div class="filter-group">
-                    <label for="filter_emocion">Emoción</label>
+                    <label for="filter_emocion">Emotion</label>
                     <select id="filter_emocion" onchange="applyTradeFilters()">
-                      <option value="">Todas</option>
+                      <option value="">All</option>
                       <option value="fomo">FOMO</option>
-                      <option value="ansioso">Ansiedad</option>
-                      <option value="calmado">Calmado</option>
+                      <option value="ansioso">Anxiety</option>
+                      <option value="calmado">Calm</option>
                       <option value="neutral">Neutral</option>
-                      <option value="frustrado">Frustrado</option>
+                      <option value="frustrado">Frustrated</option>
                     </select>
                   </div>
                   <div class="filter-group">
-                    <label for="filter_resultado">Resultado</label>
+                    <label for="filter_resultado">Result</label>
                     <select id="filter_resultado" onchange="applyTradeFilters()">
-                      <option value="">Todos</option>
-                      <option value="ganador">Ganadores</option>
-                      <option value="perdedor">Perdedores</option>
+                      <option value="">All</option>
+                      <option value="ganador">Winners</option>
+                      <option value="perdedor">Losers</option>
                       <option value="be">BE / 0R</option>
                     </select>
                   </div>
                   <div class="filter-group">
-                    <label for="filter_mercado">Mercado</label>
+                    <label for="filter_mercado">Market</label>
                     <select id="filter_mercado" onchange="applyTradeFilters()">
-                      <option value="">Todos</option>
+                      <option value="">All</option>
                     </select>
                   </div>
                   <div class="filter-group">
                     <label for="filter_killzone">NY Killzone</label>
                     <select id="filter_killzone" onchange="applyTradeFilters()">
-                      <option value="">Todos</option>
-                      <option value="si">Sí</option>
+                      <option value="">All</option>
+                      <option value="si">Yes</option>
                       <option value="no">No</option>
                     </select>
                   </div>
@@ -476,85 +476,85 @@
                 <p id="tradesCount" class="trades-count"></p>
               </div>
               <div id="tradesList">
-                <p class="empty-state">Cargando...</p>
+                <p class="empty-state">Loading...</p>
               </div>
             </div>
           </section>
 
-          <!-- ══ REPORTES ═══════════════════════════════════════════════ -->
+          <!-- ══ REPORTS ════════════════════════════════════════════════ -->
           <section class="app-section" id="section-reportes">
             <div class="section-header">
               <div>
-                <h2 class="section-title">Reportes</h2>
-                <p class="section-subtitle">Genera reportes PDF mensuales de tu operativa</p>
+                <h2 class="section-title">Reports</h2>
+                <p class="section-subtitle">Generate monthly PDF reports of your trading</p>
               </div>
             </div>
 
             <div class="card">
-              <h3 class="card-title">Descargar Reporte PDF Mensual</h3>
+              <h3 class="card-title">Download Monthly PDF Report</h3>
               <div class="form-cols">
                 <div class="form-group">
-                  <label for="pdf_year">Año</label>
+                  <label for="pdf_year">Year</label>
                   <input type="number" id="pdf_year" value="2026" min="2020" max="2030" />
                 </div>
                 <div class="form-group">
-                  <label for="pdf_month">Mes</label>
+                  <label for="pdf_month">Month</label>
                   <select id="pdf_month">
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5" selected>Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5" selected>May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
                   </select>
                 </div>
               </div>
               <div class="form-group checkbox-group" style="margin-bottom:16px;">
-                <label><input type="checkbox" id="include_pdf_images" /> Incluir screenshots en PDF</label>
+                <label><input type="checkbox" id="include_pdf_images" /> Include screenshots in PDF</label>
               </div>
-              <button onclick="downloadMonthlyPDF()">Descargar PDF</button>
+              <button onclick="downloadMonthlyPDF()">Download PDF</button>
               <div id="pdfMsg" class="result hidden"></div>
             </div>
           </section>
 
-          <!-- ══ ESTRATEGIA ═════════════════════════════════════════════ -->
+          <!-- ══ STRATEGY ═══════════════════════════════════════════════ -->
           <section class="app-section" id="section-estrategia">
             <div class="section-header">
               <div>
-                <h2 class="section-title">Estrategia</h2>
-                <p class="section-subtitle">Sistema de trading FVG — reglas y criterios de calidad</p>
+                <h2 class="section-title">Strategy</h2>
+                <p class="section-subtitle">FVG trading system — rules and quality criteria</p>
               </div>
             </div>
 
             <div class="card">
-              <h3 class="card-title">Reglas del Sistema</h3>
+              <h3 class="card-title">System Rules</h3>
 
               <div class="strategy-card-grid">
                 <div class="strategy-card">
                   <p class="strategy-label">Bias</p>
-                  <p class="strategy-value">Price zone + Liquidez pendiente + Sweep + Reacción</p>
+                  <p class="strategy-value">Price zone + Pending liquidity + Sweep + Reaction</p>
                 </div>
                 <div class="strategy-card">
                   <p class="strategy-label">Setup Core</p>
                   <p class="strategy-value">Sweep + PDA HTF + V-Shape + iFVG</p>
                 </div>
                 <div class="strategy-card">
-                  <p class="strategy-label">Confirmaciones</p>
-                  <p class="strategy-value">PDA HTF (obligatorio) · SMT (opcional)</p>
+                  <p class="strategy-label">Confirmations</p>
+                  <p class="strategy-value">PDA HTF (required) · SMT (optional)</p>
                 </div>
                 <div class="strategy-card">
-                  <p class="strategy-label">Gestión</p>
+                  <p class="strategy-label">Management</p>
                   <p class="strategy-value">Clean Reaction + NY Killzone</p>
                 </div>
                 <div class="strategy-card">
-                  <p class="strategy-label">Psicología</p>
-                  <p class="strategy-value">Seguir reglas · Estado emocional controlado</p>
+                  <p class="strategy-label">Psychology</p>
+                  <p class="strategy-value">Follow rules · Controlled emotional state</p>
                 </div>
               </div>
 
@@ -565,7 +565,7 @@
                 </div>
                 <div class="strategy-grade-item grade-a">
                   <span class="sg-grade">A</span>
-                  <span class="sg-desc">Sweep + PDA + V-Shape + IFVG + (Clean Rx o KZ NY)</span>
+                  <span class="sg-desc">Sweep + PDA + V-Shape + IFVG + (Clean Rx or KZ NY)</span>
                 </div>
                 <div class="strategy-grade-item grade-b">
                   <span class="sg-grade">B</span>
@@ -573,11 +573,11 @@
                 </div>
                 <div class="strategy-grade-item grade-c">
                   <span class="sg-grade">C</span>
-                  <span class="sg-desc">Sweep + PDA (falta V-Shape o IFVG)</span>
+                  <span class="sg-desc">Sweep + PDA (missing V-Shape or IFVG)</span>
                 </div>
                 <div class="strategy-grade-item grade-f">
                   <span class="sg-grade">F</span>
-                  <span class="sg-desc">Sin PDA confirmada</span>
+                  <span class="sg-desc">No confirmed PDA</span>
                 </div>
               </div>
             </div>
