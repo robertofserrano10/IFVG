@@ -43,7 +43,11 @@
       "Bash(.venv/Scripts/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000)",
       "Bash(git -C C:/Users/rober/Documents/fvgproyecto ls-files backend/.env)",
       "Bash(git -C C:/Users/rober/Documents/fvgproyecto check-ignore -v backend/.env)",
-      "Bash(.venv/Scripts/uvicorn app.main:app --host 127.0.0.1 --port 8000)"
+      "Bash(.venv/Scripts/uvicorn app.main:app --host 127.0.0.1 --port 8000)",
+      "Bash(git *)",
+      "PowerShell(Get-Process *)",
+      "Bash(.venv/Scripts/python -c \"from app.routes.trades import router; print\\([r.path for r in router.routes]\\)\")",
+      "Bash(.venv/Scripts/uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload)"
     ]
   },
   "disabledMcpjsonServers": [

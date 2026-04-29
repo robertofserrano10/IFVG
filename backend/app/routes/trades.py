@@ -128,3 +128,19 @@ def create_trade(payload: TradeCreate):
         return _add_labels(response.data[0])
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/trades/{trade_id}")
+def delete_trade(trade_id: int):
+    try:
+        client = get_supabase_client()
+        existing = client.table("trades").select("id").eq("id", trade_id).execute()
+        if not existing.data:
+            raise HTTPException(status_code=404, detail=f"Trade {trade_id} not found")
+        client.table("trade_images").delete().eq("trade_id", trade_id).execute()
+        client.table("trades").delete().eq("id", trade_id).execute()
+        return {"deleted": True, "trade_id": trade_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

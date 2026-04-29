@@ -834,7 +834,24 @@ function renderTradeCard(trade) {
       ${imagesHtml}
       ${notesHtml}
       <p class="bias-created">Registered: ${formatDateTime(trade.created_at)}</p>
+      <div class="trade-delete-row">
+        <button class="btn-delete-trade" onclick="deleteTrade(${trade.id})">Delete Trade</button>
+      </div>
     </div>`;
+}
+
+// ─── Trades — DELETE ─────────────────────────────────────────────────────────
+
+async function deleteTrade(tradeId) {
+  if (!confirm("Are you sure you want to delete this trade? This action cannot be undone.")) return;
+  try {
+    const r = await fetch(`${BACKEND_URL}/trades/${tradeId}`, { method: "DELETE" });
+    if (!r.ok) throw new Error(`Status: ${r.status}`);
+    await loadTrades();
+    await loadMetrics();
+  } catch (err) {
+    alert(`Error deleting trade: ${err.message}`);
+  }
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────

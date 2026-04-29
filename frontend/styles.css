@@ -1401,6 +1401,28 @@ button:disabled {
   cursor: pointer;
 }
 
+.trade-delete-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.btn-delete-trade {
+  background: transparent;
+  border: 1px solid var(--red);
+  color: var(--red);
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-delete-trade:hover {
+  background: var(--red);
+  color: #fff;
+}
+
 @media (max-width: 768px) {
   .confirm-grid {
     grid-template-columns: 1fr;
