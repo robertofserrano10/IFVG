@@ -23,9 +23,18 @@ app = FastAPI(
 # IMPORTANTE: allow_credentials=True es incompatible con allow_origins=["*"].
 # Los navegadores rechazan esa combinación con error CORS.
 # En desarrollo usamos False; en producción se especifica la URL exacta del frontend.
+_dev_origins = [
+    "http://localhost",
+    "http://localhost:5500",
+    "http://127.0.0.1",
+    "http://127.0.0.1:5500",
+    "http://localhost:8080",
+]
+_origins = ([settings.frontend_origin] + _dev_origins) if settings.frontend_origin else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_origins,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

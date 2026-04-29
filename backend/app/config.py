@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     supabase_service_role_key: str = ""
     backend_host: str = "127.0.0.1"
     backend_port: int = 8000
+    frontend_origin: str = ""
 
     # model_config es la sintaxis correcta en pydantic-settings v2
     model_config = SettingsConfigDict(
