@@ -289,6 +289,9 @@ function renderTradingDays(days) {
         <div class="day-tags">${newsTag}${athTag}</div>
         ${notesHtml}
         <p class="day-created">Registered: ${formatDateTime(day.created_at)}</p>
+        <div class="trade-delete-row">
+          <button class="btn-delete-trade" onclick="deleteTradingDay(${day.id})">Delete Day</button>
+        </div>
       </div>
     `;
   }).join("");
@@ -496,6 +499,9 @@ function renderDailyBias(biases) {
         ${invalidationHtml}
         ${commentsHtml}
         <p class="bias-created">Registered: ${formatDateTime(bias.created_at)}</p>
+        <div class="trade-delete-row">
+          <button class="btn-delete-trade" onclick="deleteDailyBias(${bias.id})">Delete Bias</button>
+        </div>
       </div>
     `;
   }).join("");
@@ -855,6 +861,35 @@ function renderTradeCard(trade) {
         <button class="btn-delete-trade" onclick="deleteTrade(${trade.id})">Delete Trade</button>
       </div>
     </div>`;
+}
+
+// ─── Trading Day — DELETE ────────────────────────────────────────────────────
+
+async function deleteTradingDay(dayId) {
+  if (!confirm("Delete this trading day and all related trades/bias? This action cannot be undone.")) return;
+  try {
+    const r = await fetch(`${BACKEND_URL}/trading-days/${dayId}`, { method: "DELETE" });
+    if (!r.ok) throw new Error(`Status: ${r.status}`);
+    await loadTradingDays();
+    await loadDailyBias();
+    await loadTrades();
+    await loadMetrics();
+  } catch (err) {
+    alert(`Error deleting trading day: ${err.message}`);
+  }
+}
+
+// ─── Daily Bias — DELETE ──────────────────────────────────────────────────────
+
+async function deleteDailyBias(biasId) {
+  if (!confirm("Delete this daily bias? This action cannot be undone.")) return;
+  try {
+    const r = await fetch(`${BACKEND_URL}/daily-bias/${biasId}`, { method: "DELETE" });
+    if (!r.ok) throw new Error(`Status: ${r.status}`);
+    await loadDailyBias();
+  } catch (err) {
+    alert(`Error deleting daily bias: ${err.message}`);
+  }
 }
 
 // ─── Trades — DELETE ─────────────────────────────────────────────────────────

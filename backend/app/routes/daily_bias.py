@@ -35,3 +35,18 @@ def create_daily_bias(payload: DailyBiasCreate):
         return response.data[0]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/daily-bias/{bias_id}")
+def delete_daily_bias(bias_id: int):
+    try:
+        client = get_supabase_client()
+        existing = client.table("daily_bias").select("id").eq("id", bias_id).execute()
+        if not existing.data:
+            raise HTTPException(status_code=404, detail=f"Daily bias {bias_id} not found")
+        client.table("daily_bias").delete().eq("id", bias_id).execute()
+        return {"deleted": True, "daily_bias_id": bias_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

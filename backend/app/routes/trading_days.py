@@ -39,3 +39,29 @@ def create_trading_day(payload: TradingDayCreate):
         return response.data[0]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/trading-days/{trading_day_id}")
+def delete_trading_day(trading_day_id: int):
+    try:
+        client = get_supabase_client()
+        existing = client.table("trading_days").select("id").eq("id", trading_day_id).execute()
+        if not existing.data:
+            raise HTTPException(status_code=404, detail=f"Trading day {trading_day_id} not found")
+        # Get trade IDs for this day
+        trades = client.table("trades").select("id").eq("trading_day_id", trading_day_id).execute()
+        trade_ids = [t["id"] for t in trades.data]
+        # Delete trade_images for those trades
+        for tid in trade_ids:
+            client.table("trade_images").delete().eq("trade_id", tid).execute()
+        # Delete trades
+        client.table("trades").delete().eq("trading_day_id", trading_day_id).execute()
+        # Delete daily_bias
+        client.table("daily_bias").delete().eq("trading_day_id", trading_day_id).execute()
+        # Delete trading_day
+        client.table("trading_days").delete().eq("id", trading_day_id).execute()
+        return {"deleted": True, "trading_day_id": trading_day_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
