@@ -7,42 +7,36 @@ from supabase import create_client, Client
 from app.config import settings
 
 
-def get_supabase_client() -> Client:
-    """
-    Crea y devuelve el cliente de Supabase usando las credenciales del .env.
-    Lanza un error claro si faltan credenciales o si la URL tiene formato incorrecto.
-    """
+def _get_url() -> str:
     if not settings.supabase_url:
         raise ValueError(
             "Falta SUPABASE_URL en el archivo .env. "
             "Cópiala desde tu proyecto en supabase.com → Settings → API."
         )
-
-    if not settings.supabase_anon_key:
-        raise ValueError(
-            "Falta SUPABASE_ANON_KEY en el archivo .env. "
-            "Cópiala desde tu proyecto en supabase.com → Settings → API."
-        )
-
-    # Normalizar: eliminar trailing slash para evitar errores de validacion internos
     url = settings.supabase_url.rstrip("/")
-
-    # Rechazar URLs que incluyan rutas de API — solo se acepta la URL base del proyecto
     if "/rest/v1" in url or "/auth/v1" in url or "/storage/v1" in url:
         raise ValueError(
             "SUPABASE_URL no debe incluir rutas como /rest/v1/ o /auth/v1/. "
             "El valor correcto es solo la URL base del proyecto, por ejemplo: "
             "https://kiecdnqfnxfspmghlhdy.supabase.co"
         )
+    return url
 
-    client: Client = create_client(url, settings.supabase_anon_key)
-    return client
+
+def get_supabase_client() -> Client:
+    """Returns a service_role client when available (bypasses RLS for server-side ops), falls back to anon_key."""
+    url = _get_url()
+    key = settings.supabase_service_role_key or settings.supabase_anon_key
+    if not key:
+        raise ValueError(
+            "Falta SUPABASE_ANON_KEY en el archivo .env. "
+            "Cópiala desde tu proyecto en supabase.com → Settings → API."
+        )
+    return create_client(url, key)
 
 
 def get_storage_client() -> Client:
-    if not settings.supabase_url:
-        raise ValueError("Falta SUPABASE_URL en el archivo .env.")
-    url = settings.supabase_url.rstrip("/")
+    url = _get_url()
     key = settings.supabase_service_role_key or settings.supabase_anon_key
     if not key:
         raise ValueError("Falta SUPABASE_ANON_KEY o SUPABASE_SERVICE_ROLE_KEY en el .env.")
