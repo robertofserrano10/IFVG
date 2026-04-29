@@ -5,7 +5,18 @@ let dailyBiasCache   = [];
 let tradesCache      = [];
 let tradeImagesCache = [];
 
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function setTodayDate() {
+  const el = document.getElementById("trade_date");
+  if (el && !el.value) el.value = todayISO();
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+  setTodayDate();
   await loadMetrics();
   await loadTradingDays();
   await loadDailyBias();
@@ -197,6 +208,7 @@ async function saveTradingDay(event) {
     msgBox.textContent = "Trading day saved successfully.";
     msgBox.className = "result success";
     document.getElementById("trading_day_form").reset();
+    setTodayDate();
     await loadTradingDays();
   } catch (error) {
     msgBox.textContent = `Error saving: ${error.message}`;
@@ -219,6 +231,11 @@ async function loadTradingDays() {
     tradingDaysCache = days;
     populateDaySelect("bias_trading_day_id", days);
     populateDaySelect("trade_trading_day_id", days);
+    // Auto-select most recent trading day in trade form if nothing chosen yet
+    const tradeSelect = document.getElementById("trade_trading_day_id");
+    if (tradeSelect && !tradeSelect.value && days.length > 0) {
+      tradeSelect.value = days[0].id;
+    }
     populateMarketFilter();
     renderTradingDays(days);
   } catch (error) {
