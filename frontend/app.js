@@ -15,8 +15,23 @@ function setTodayDate() {
   if (el && !el.value) el.value = todayISO();
 }
 
+// ─── Delete visibility (danger zone) ─────────────────────────────────────────
+
+function isDeleteEnabled() {
+  return localStorage.getItem("show_delete_buttons") === "true";
+}
+
+function onDeleteToggleChange(checkbox) {
+  localStorage.setItem("show_delete_buttons", checkbox.checked ? "true" : "false");
+  loadTradingDays();
+  loadDailyBias();
+  loadTrades();
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   setTodayDate();
+  const toggle = document.getElementById("toggle_show_delete_buttons");
+  if (toggle) toggle.checked = isDeleteEnabled();
   await loadMetrics();
   await loadTradingDays();
   await loadDailyBias();
@@ -289,9 +304,7 @@ function renderTradingDays(days) {
         <div class="day-tags">${newsTag}${athTag}</div>
         ${notesHtml}
         <p class="day-created">Registered: ${formatDateTime(day.created_at)}</p>
-        <div class="trade-delete-row">
-          <button class="btn-delete-trade" onclick="deleteTradingDay(${day.id})">Delete Day</button>
-        </div>
+        ${isDeleteEnabled() ? `<div class="trade-delete-row"><button class="btn-delete-trade" onclick="deleteTradingDay(${day.id})">Delete Day</button></div>` : ""}
       </div>
     `;
   }).join("");
@@ -499,9 +512,7 @@ function renderDailyBias(biases) {
         ${invalidationHtml}
         ${commentsHtml}
         <p class="bias-created">Registered: ${formatDateTime(bias.created_at)}</p>
-        <div class="trade-delete-row">
-          <button class="btn-delete-trade" onclick="deleteDailyBias(${bias.id})">Delete Bias</button>
-        </div>
+        ${isDeleteEnabled() ? `<div class="trade-delete-row"><button class="btn-delete-trade" onclick="deleteDailyBias(${bias.id})">Delete Bias</button></div>` : ""}
       </div>
     `;
   }).join("");
@@ -857,9 +868,7 @@ function renderTradeCard(trade) {
       ${imagesHtml}
       ${notesHtml}
       <p class="bias-created">Registered: ${formatDateTime(trade.created_at)}</p>
-      <div class="trade-delete-row">
-        <button class="btn-delete-trade" onclick="deleteTrade(${trade.id})">Delete Trade</button>
-      </div>
+      ${isDeleteEnabled() ? `<div class="trade-delete-row"><button class="btn-delete-trade" onclick="deleteTrade(${trade.id})">Delete Trade</button></div>` : ""}
     </div>`;
 }
 

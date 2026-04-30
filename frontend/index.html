@@ -22,6 +22,7 @@
           <li class="nav-item" data-section="journal" onclick="showSection('journal')">Journal</li>
           <li class="nav-item" data-section="reportes" onclick="showSection('reportes')">Reports</li>
           <li class="nav-item" data-section="estrategia" onclick="showSection('estrategia')">Strategy</li>
+          <li class="nav-item" data-section="settings" onclick="showSection('settings')">Settings</li>
         </ul>
       </nav>
 
@@ -579,6 +580,27 @@
                   <span class="sg-grade">F</span>
                   <span class="sg-desc">No confirmed PDA</span>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ══ SETTINGS ══════════════════════════════════════════════ -->
+          <section class="app-section" id="section-settings">
+            <div class="section-header">
+              <div>
+                <h2 class="section-title">Settings</h2>
+                <p class="section-subtitle">Application preferences and danger controls</p>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 class="card-title">Danger Zone</h3>
+              <p class="card-desc" style="color:#f87171;">Enabling this will allow permanent data deletion</p>
+              <div class="form-group checkbox-group" style="margin-top:16px;">
+                <label style="display:flex;align-items:center;gap:10px;font-size:1rem;cursor:pointer;">
+                  <input type="checkbox" id="toggle_show_delete_buttons" onchange="onDeleteToggleChange(this)" />
+                  Show delete buttons (danger zone)
+                </label>
               </div>
             </div>
           </section>
